@@ -12,7 +12,7 @@ def overlay_highest_score(cv2, res_plotted, results):
         x2 = xy[2]
         y2 = xy[3]
 
-        cv2.rectangle(res_plotted, (x1, y1), (x2, y2), (0,0,0), -1)
+        #cv2.rectangle(res_plotted, (x1, y1), (x2, y2), (0,0,0), -1)
 
         cv2.circle(res_plotted, center=((x2 + x1) // 2, (y2 + y1) // 2), radius=30, color=(0, 0, 255),
                    thickness=-1)

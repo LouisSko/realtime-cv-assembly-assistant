@@ -5,16 +5,17 @@ from overlays import *
 # load a pretrained model
 model = YOLO("yolov8n.pt")
 
-url = 'http://192.168.0.202:4747/video'
+#url = 'http://192.168.0.202:4747/video'
+#url = 'http://172.17.46.21/video'
 #cap = cv2.VideoCapture(url)
 
-cap = cv2.VideoCapture('/Users/louis.skowronek/IMG_4358.MOV')
+cap = cv2.VideoCapture('/Users/louis.skowronek/Downloads/IMG_4378.MOV')
 it = 0
 while cap.isOpened():
 
     success, img = cap.read()
 
-    if success and it % 3 == 0:
+    if success:# and it % 3 == 0:
         # predict on an image
         results = model(img)
         res_plotted = results[0].plot(boxes=True)
