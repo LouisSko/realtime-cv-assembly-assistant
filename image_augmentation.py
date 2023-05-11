@@ -94,10 +94,13 @@ def convert_bbf_to_yolo(boxes):
     return yolo_boxes
 
 
-def image_augmentation(dir_images, dir_annot, dir_aug_images, dir_aug_annot, nr_of_augs=3):
+def image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs=5):
 
     # Check if the directories exist, create them if necessary
-    for dir_path in [dir_aug_images, dir_aug_annot]:
+    dir_aug_images = os.path.join(dir_augmentation, 'images')
+    dir_aug_annot = os.path.join(dir_augmentation, 'labels')
+
+    for dir_path in [dir_augmentation, dir_aug_images, dir_aug_annot]:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
@@ -172,10 +175,9 @@ def image_augmentation(dir_images, dir_annot, dir_aug_images, dir_aug_annot, nr_
 if __name__ == "__main__":
     dir_images = '/Users/louis.skowronek/Downloads/drive-download-20230511T081929Z-001'
     dir_annot = '/Users/louis.skowronek/annotated_files'
-    dir_aug_images = '/Users/louis.skowronek/images_augmented'
-    dir_aug_annot = '/Users/louis.skowronek/images_augmented_annotations'
+    dir_augmentation = '/Users/louis.skowronek/images_augmented'
     nr_of_augs=20
 
-    image_augmentation(dir_images, dir_annot, dir_aug_images, dir_aug_annot, nr_of_augs)
+    image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs)
 
     # verbesserung: bboxes nicht direkt wegwerfen, wenn es diese nicht vollends im Bild ist

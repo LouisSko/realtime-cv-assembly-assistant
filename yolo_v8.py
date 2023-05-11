@@ -2,6 +2,8 @@ from ultralytics import YOLO
 import cv2
 from overlays import *
 
+
+
 # load a pretrained model
 model = YOLO("yolov8n.pt")
 
