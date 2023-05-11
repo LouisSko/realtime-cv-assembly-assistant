@@ -77,7 +77,6 @@ def convert_bbf_to_yolo(boxes):
 
         # only store bb if its in the image
         if bb.is_fully_within_image(boxes.shape):
-
             class_id = bb.label
             x1, y1, x2, y2 = bb.x1, bb.y1, bb.x2, bb.y2
 
@@ -89,17 +88,21 @@ def convert_bbf_to_yolo(boxes):
             width = (x2 - x1) / pixel_width
             height = (y2 - y1) / pixel_height
 
-            yolo_boxes.append([class_id, np.round(x_center, 6), np.round(y_center, 6), np.round(width, 6), np.round(height, 6)])
+            yolo_boxes.append(
+                [class_id, np.round(x_center, 6), np.round(y_center, 6), np.round(width, 6), np.round(height, 6)])
 
     return yolo_boxes
 
 
-def image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs=5):
+def image_augmentation(dir_files, dir_augmentation, nr_of_augs=5):
 
-    # Check if the directories exist, create them if necessary
+    dir_images = os.path.join(dir_files, 'images')
+    dir_annot = os.path.join(dir_files, 'labels')
+
     dir_aug_images = os.path.join(dir_augmentation, 'images')
     dir_aug_annot = os.path.join(dir_augmentation, 'labels')
 
+    # Check if the directories exist, create them if necessary
     for dir_path in [dir_augmentation, dir_aug_images, dir_aug_annot]:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
@@ -155,7 +158,6 @@ def image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs=5):
 
                 # Only store image, if it contains any boxes
                 if len(boxes_new) > 0:
-
                     # Save image and annotations
                     aug_pil_image = Image.fromarray(aug_image)
 
@@ -173,11 +175,10 @@ def image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs=5):
 
 
 if __name__ == "__main__":
-    dir_images = '/Users/louis.skowronek/Downloads/drive-download-20230511T081929Z-001'
-    dir_annot = '/Users/louis.skowronek/annotated_files'
-    dir_augmentation = '/Users/louis.skowronek/images_augmented'
-    nr_of_augs=20
+    dir_files = '/Users/louis.skowronek/aiss_images'
+    dir_augmentation = '/Users/louis.skowronek/aiss_images_augmented'
+    nr_of_augs = 5
 
-    image_augmentation(dir_images, dir_annot, dir_augmentation, nr_of_augs)
+    image_augmentation(dir_files, dir_augmentation, nr_of_augs)
 
     # verbesserung: bboxes nicht direkt wegwerfen, wenn es diese nicht vollends im Bild ist

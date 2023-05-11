@@ -1,6 +1,7 @@
 #path: 
-train: /Users/louis.skowronek/images_augmented/train/images 
-val: /Users/louis.skowronek/images_augmented/train/images 
+train: /Users/louis.skowronek/aiss_images_augmented/train/images 
+val: /Users/louis.skowronek/aiss_images_augmented/val/images 
+test: /Users/louis.skowronek/aiss_images_augmented/test/images 
 
 nc: 18
 
