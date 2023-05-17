@@ -25,3 +25,24 @@ def convert_jpeg_to_png(jpeg_dir, png_dir, drop_original=True):
         if drop_original:
             os.remove(image_path)
 
+def convert_png_to_jpeg(png_dir, jpeg_dir, drop_original=True):
+    # List of image file extensions to consider
+    image_extensions = [".jpg", ".jpeg", ".png", ".gif"]
+    # Get all image files in the directory
+    png_images = [file for file in os.listdir(png_dir) if os.path.isfile(os.path.join(png_dir, file)) and any(
+        file.lower().endswith(ext) for ext in image_extensions)]
+
+    # Convert each PNG image to JPEG format
+    for png_image in tqdm(png_images):
+        # Load the PNG image
+        image_path = os.path.join(png_dir, png_image)
+        image = Image.open(image_path)
+
+        # Convert the image to JPEG format
+        jpeg_image = os.path.splitext(png_image)[0] + ".jpeg"
+        jpeg_path = os.path.join(jpeg_dir, jpeg_image)
+
+        image.convert("RGB").save(jpeg_path, "JPEG")
+
+        if drop_original:
+            os.remove(image_path)

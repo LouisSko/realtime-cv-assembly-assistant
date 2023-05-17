@@ -55,14 +55,14 @@ def convert_yolo_to_bbf(boxes, pixel_height, pixel_width, formatBoundingBox=Fals
     return boxes_bbf
 
 
-def convert_bbf_to_yolo(BoundingBox, boxes):
+def convert_bbf_to_yolo(boxes):
     """
     Convert bounding box format to YOLO format
     (class id, x_min, x_max, y_min, y_max) to (class_id, x_center, y_center, width, height)
     """
     pixel_height, pixel_width = boxes.shape[0], boxes.shape[1]
     yolo_boxes = []
-    for bb in BoundingBox.bounding_boxes:
+    for bb in boxes.bounding_boxes:
 
         # only store bb if its in the image
         if bb.is_fully_within_image(boxes.shape):

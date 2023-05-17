@@ -45,17 +45,23 @@ def move_files(file_list, input_dir, output_dir):
     os.makedirs(output_dir_img, exist_ok=True)
     os.makedirs(output_dir_labels, exist_ok=True)
 
-    for file in tqdm(file_list):
-        # Move the image file
-        image_src = os.path.join(input_dir, 'images', file)
-        image_dest = os.path.join(output_dir_img, file)
-        shutil.copy(image_src, image_dest)
 
-        # Move the label file
-        label_file = file.split('.')[0] + '.txt'
-        label_src = os.path.join(input_dir, 'labels', label_file)
-        label_dest = os.path.join(output_dir_labels, label_file)
-        shutil.copy(label_src, label_dest)
+    for file in tqdm(file_list):
+
+        try:
+            # Move the image file
+            image_src = os.path.join(input_dir, 'images', file)
+            image_dest = os.path.join(output_dir_img, file)
+
+            label_file = file.split('.')[0] + '.txt'
+            label_src = os.path.join(input_dir, 'labels', label_file)
+            label_dest = os.path.join(output_dir_labels, label_file)
+
+            shutil.copy(image_src, image_dest)
+            shutil.copy(label_src, label_dest)
+
+        except Exception as e:
+            print(f'error at file {image_src}, {label_file}: {e}')
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import pandas as pd
 from imgaug import augmenters, BoundingBox, BoundingBoxesOnImage
-from PIL import Image
 import os
 from tqdm import tqdm
 from convert_yolo import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
@@ -52,7 +51,7 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
 
             # Load original image and bounding box annotations
             image = cv2.imread(os.path.join(dir_images, img))
-            original_image = Image.fromarray(image)
+
             boxes = read_yolo_file(os.path.join(dir_annot, txt))
 
             # Convert yolo format to bounding box format
@@ -66,21 +65,20 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
 
                 # Apply augmentation
                 aug_image, aug_bbs = seq(image=image, bounding_boxes=bbs)
+                # aug_image = cv2.cvtColor(aug_image, cv2.COLOR_BGR2RGB)
 
                 # Convert back to yolo - only store bbs which are fully visible in the image
                 boxes_new = convert_bbf_to_yolo(aug_bbs)
 
                 # Only store image, if it contains any boxes
                 if len(boxes_new) > 0:
-                    # Save image and annotations
-                    aug_pil_image = Image.fromarray(aug_image)
 
                     # Generate unique file names for each augmentation
-                    aug_image_name = f"{img.split('.')[0]}_{it}.jpg"
+                    aug_image_name = f"{img.split('.')[0]}_{it}.jpeg"
                     aug_annot_name = f"{img.split('.')[0]}_{it}.txt"
 
                     # save augmented image
-                    aug_pil_image.save(os.path.join(dir_aug_images, aug_image_name))
+                    cv2.imwrite(os.path.join(dir_aug_images, aug_image_name), aug_image)
                     save_yolo_file(os.path.join(dir_aug_annot, aug_annot_name), boxes_new)
 
             # save original image
