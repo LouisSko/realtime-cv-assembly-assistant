@@ -3,15 +3,17 @@ import cv2
 from overlays import *
 
 
-
 # load a pretrained model
-model = YOLO("yolov8n.pt")
+model = YOLO("/Users/louis.skowronek/object-detection-project/runs/detect/yolov8n_V1/weights/last.pt")
 
 #url = 'http://192.168.0.202:4747/video'
 #url = 'http://172.17.46.21/video'
 #cap = cv2.VideoCapture(url)
 
-cap = cv2.VideoCapture('/Users/louis.skowronek/Downloads/IMG_4378.MOV')
+#qcap = cv2.VideoCapture('/Users/louis.skowronek/Downloads/IMG_4378.MOV')
+
+cap = cv2.VideoCapture('/Users/louis.skowronek/Downloads/VIDEO-2023-05-11-19-36-07.mp4')
+
 it = 0
 while cap.isOpened():
 

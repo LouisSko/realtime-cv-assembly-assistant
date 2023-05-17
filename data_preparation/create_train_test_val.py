@@ -3,6 +3,7 @@ import shutil
 import random
 from tqdm import tqdm
 
+
 def split_dataset(input_dir, output_dir, split_ratio=(0.8, 0.1, 0.1)):
     assert sum(split_ratio) == 1.0, "Split ratio must sum up to 1.0"
 
@@ -36,8 +37,8 @@ def split_dataset(input_dir, output_dir, split_ratio=(0.8, 0.1, 0.1)):
     move_files(test_images, input_dir, test_dir)
     move_files(val_images, input_dir, val_dir)
 
-def move_files(file_list, input_dir, output_dir):
 
+def move_files(file_list, input_dir, output_dir):
     # create directories
     output_dir_img = os.path.join(output_dir, 'images')
     output_dir_labels = os.path.join(output_dir, 'labels')
@@ -56,13 +57,13 @@ def move_files(file_list, input_dir, output_dir):
         label_dest = os.path.join(output_dir_labels, label_file)
         shutil.copy(label_src, label_dest)
 
-if __name__=="__main__":
 
-    # Input directory path
-    input_directory = '/Users/louis.skowronek/aiss_images_augmented'
+if __name__ == "__main__":
+    # Input directory path. Should contain a folder images and labels
+    input_directory = '/Users/louis.skowronek/aiss_images'
 
     # Output directory path
-    output_directory = '/Users/louis.skowronek/aiss_images_augmented'
+    output_directory = '/Users/louis.skowronek/aiss_images'
 
     # Split ratio (train, test, val)
     split_ratio = (0.8, 0.1, 0.1)

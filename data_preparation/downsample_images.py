@@ -2,14 +2,19 @@ import os
 from PIL import Image
 from tqdm import tqdm
 
-def resize_images(directory, output_directory, max_width, max_height):
+
+def resize_images(input_dir, output_dir, max_width, max_height):
+
     # Create the output directory if it doesn't exist
-    os.makedirs(output_directory, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Iterate over all files in the directory
-    for file_name in tqdm(os.listdir(directory)):
-        file_path = os.path.join(directory, file_name)
-        if os.path.isfile(file_path):
+    for file_name in tqdm(os.listdir(input_dir)):
+
+        file_path = os.path.join(input_dir, file_name)
+
+        # Check file extension
+        if os.path.isfile(file_path) and file_name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
 
             # Open the image file
             img = Image.open(file_path)
@@ -30,19 +35,26 @@ def resize_images(directory, output_directory, max_width, max_height):
             resized_img = img.resize((new_width, new_height))
 
             # Save the resized image
-            output_file_path = os.path.join(output_directory, file_name)
+            output_file_path = os.path.join(output_dir, file_name)
             resized_img.save(output_file_path)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
 
     # Input directory path
-    directory_path = '/Users/louis.skowronek/aiss_images_augmented/images'
+    input_directory_path_base = '/Users/louis.skowronek/aiss_images/'
+
     # Output directory path
-    output_directory_path = '/Users/louis.skowronek/aiss_images_augmented/images'
+    output_directory_path_base = '/Users/louis.skowronek/aiss_images/'
 
     # Target resolution (1080p)
     max_width = 1080
     max_height = 720
 
-    # Resize the images
-    resize_images(directory_path, output_directory_path, max_width, max_height)
+    # resize images in all three folders
+    for folder in ['train', 'val', 'test']:
+        input_dir = os.path.join(input_directory_path_base, folder, 'images')
+        output_dir = os.path.join(output_directory_path_base, folder, 'images')
+
+        # Resize the images
+        resize_images(input_dir, output_dir, max_width, max_height)

@@ -9,7 +9,7 @@ def train_yolo_v8():
 
     model.train(data="/Users/louis.skowronek/object-detection-project/aiss_yolo.yaml",
                 pretrained=True,
-                epochs=2,
+                epochs=5,
                 name='yolov8n_custom')
 
 

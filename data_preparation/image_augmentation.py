@@ -5,105 +5,19 @@ from imgaug import augmenters, BoundingBox, BoundingBoxesOnImage
 from PIL import Image
 import os
 from tqdm import tqdm
+from convert_yolo import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
 
 
-def read_yolo_file(file_path):
-    """
-    Read yolo file and output it as a list
-    :param file_path:
-    :return:
-    """
+def image_augmentation(input_dir, output_dir, nr_of_augs=5):
 
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+    dir_images = os.path.join(input_dir, 'images')
+    dir_annot = os.path.join(input_dir, 'labels')
 
-    boxes = []
-    for line in lines:
-        data = line.strip().split(' ')
-        class_id = int(data[0])
-        x_center = float(data[1])
-        y_center = float(data[2])
-        width = float(data[3])
-        height = float(data[4])
-
-        boxes.append([class_id, x_center, y_center, width, height])
-
-    return boxes
-
-
-def save_yolo_file(file_path, bounding_boxes):
-    with open(file_path, 'w') as file:
-        for bbox in bounding_boxes:
-            line = ' '.join(str(value) for value in bbox)
-            file.write(line + '\n')
-
-
-def convert_yolo_to_bbf(boxes, pixel_height, pixel_width):
-    """
-    Convert YOLO format to bounding box format
-    (class_id, x_center, y_center, width, height) to (class id, x_min, x_max, y_min, y_max)
-    """
-
-    boxes_bbf = []
-
-    for box in boxes:
-        class_id, x_center, y_center, width, height = box
-
-        # relative position
-        x_min_rel = x_center - (width / 2)
-        y_min_rel = y_center - (height / 2)
-        x_max_rel = x_center + (width / 2)
-        y_max_rel = y_center + (height / 2)
-
-        # absolute position
-        x_min = x_min_rel * pixel_width
-        y_min = y_min_rel * pixel_height
-        x_max = x_max_rel * pixel_width
-        y_max = y_max_rel * pixel_height
-
-        boxes_bbf.append(BoundingBox(x1=x_min, y1=y_min, x2=x_max, y2=y_max, label=class_id))
-
-    return boxes_bbf
-
-
-def convert_bbf_to_yolo(boxes):
-    """
-    Convert bounding box format to YOLO format
-    (class id, x_min, x_max, y_min, y_max) to (class_id, x_center, y_center, width, height)
-    """
-    pixel_height, pixel_width = boxes.shape[0], boxes.shape[1]
-    yolo_boxes = []
-    for bb in boxes.bounding_boxes:
-
-        # only store bb if its in the image
-        if bb.is_fully_within_image(boxes.shape):
-            class_id = bb.label
-            x1, y1, x2, y2 = bb.x1, bb.y1, bb.x2, bb.y2
-
-            # only append boxes for those objects which are still visible after the augmentation
-            # if not (x1 < 0 and x2 < 0) or (x1 > pixel_width and x2 > pixel_width) or (y1 < 0 and y2 < 0)or (y1 > pixel_height and y2 > pixel_height):
-
-            x_center = (x1 + x2) / 2.0 / pixel_width
-            y_center = (y1 + y2) / 2.0 / pixel_height
-            width = (x2 - x1) / pixel_width
-            height = (y2 - y1) / pixel_height
-
-            yolo_boxes.append(
-                [class_id, np.round(x_center, 6), np.round(y_center, 6), np.round(width, 6), np.round(height, 6)])
-
-    return yolo_boxes
-
-
-def image_augmentation(dir_files, dir_augmentation, nr_of_augs=5):
-
-    dir_images = os.path.join(dir_files, 'images')
-    dir_annot = os.path.join(dir_files, 'labels')
-
-    dir_aug_images = os.path.join(dir_augmentation, 'images')
-    dir_aug_annot = os.path.join(dir_augmentation, 'labels')
+    dir_aug_images = os.path.join(output_dir, 'images')
+    dir_aug_annot = os.path.join(output_dir, 'labels')
 
     # Check if the directories exist, create them if necessary
-    for dir_path in [dir_augmentation, dir_aug_images, dir_aug_annot]:
+    for dir_path in [output_dir, dir_aug_images, dir_aug_annot]:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
@@ -113,10 +27,10 @@ def image_augmentation(dir_files, dir_augmentation, nr_of_augs=5):
         augmenters.Flipud(p=0.5),  # Vertical flipping
         # augmenters.AllChannelsCLAHE(clip_limit=(0.01, )),  # Contrast enhancement
         augmenters.Affine(rotate=(-45, 45)),  # Rotation between -30 to 30 degrees
-        augmenters.AdditiveGaussianNoise(scale=(0, 0.6 * 255)),  # Add Gaussian noise
-        augmenters.GammaContrast(gamma=(0.5, 2.0)),  # Gamma correction for contrast adjustment
+        # augmenters.AdditiveGaussianNoise(scale=(0, 0.6 * 255)),  # Add Gaussian noise
+        # augmenters.GammaContrast(gamma=(0.5, 2.0)),  # Gamma correction for contrast adjustment
         # augmenters.PerspectiveTransform(scale=(0.01, 0.1)),  # Perspective transformation
-        augmenters.Multiply((0.7, 1.3)),  # Multiply pixel values by a random value between 0.5 and 1.5
+        # augmenters.Multiply((0.7, 1.3)),  # Multiply pixel values by a random value between 0.5 and 1.5
         augmenters.Crop(px=(0, 1500)),  # Random cropping
     ])
 
@@ -142,7 +56,7 @@ def image_augmentation(dir_files, dir_augmentation, nr_of_augs=5):
             boxes = read_yolo_file(os.path.join(dir_annot, txt))
 
             # Convert yolo format to bounding box format
-            boxes_conv = convert_yolo_to_bbf(boxes, pixel_height=image.shape[0], pixel_width=image.shape[1])
+            boxes_conv = convert_yolo_to_bbf(boxes, pixel_height=image.shape[0], pixel_width=image.shape[1], formatBoundingBox=True)
 
             # Convert bounding box coordinates to imgaug format
             bbs = BoundingBoxesOnImage(boxes_conv, shape=image.shape)
@@ -170,15 +84,21 @@ def image_augmentation(dir_files, dir_augmentation, nr_of_augs=5):
                     save_yolo_file(os.path.join(dir_aug_annot, aug_annot_name), boxes_new)
 
             # save original image
-            original_image.save(os.path.join(dir_aug_images, img))
-            save_yolo_file(os.path.join(dir_aug_annot, txt), boxes)
+            # original_image.save(os.path.join(dir_aug_images, img))
+            # save_yolo_file(os.path.join(dir_aug_annot, txt), boxes)
 
 
 if __name__ == "__main__":
-    dir_files = '/Users/louis.skowronek/aiss_images'
-    dir_augmentation = '/Users/louis.skowronek/aiss_images_augmented'
-    nr_of_augs = 5
 
-    image_augmentation(dir_files, dir_augmentation, nr_of_augs)
+    # Input directory path. Should contain a folder images and labels
+    input_dir = '/Users/louis.skowronek/aiss_images/train'
+
+    # Output directory path
+    output_dir = '/Users/louis.skowronek/aiss_images/train'
+
+    # Number of augmented images per image
+    nr_of_augs = 10
+
+    image_augmentation(input_dir, output_dir, nr_of_augs)
 
     # verbesserung: bboxes nicht direkt wegwerfen, wenn es diese nicht vollends im Bild ist
