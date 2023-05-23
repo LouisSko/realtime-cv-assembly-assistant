@@ -7,6 +7,11 @@ FROM nvcr.io/nvidia/l4t-pytorch:r32.6.1-pth1.9-py3
 #Required for libjasper-dev
 RUN echo "deb http://ports.ubuntu.com/ubuntu-ports/ xenial-security main restricted" | tee -a /etc/apt/sources.list
 
+# install cmake
+RUN apt-get install cmake -y libprotobuf-dev protobuf-compiler && \
+	pip3 install Cython && \
+    pip3 install onnx==1.10
+
 #INSTALL OPENCV dependencies
 RUN apt update && apt purge *libopencv* && apt install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
@@ -15,7 +20,6 @@ RUN apt update && apt purge *libopencv* && apt install -y build-essential cmake 
     libv4l-dev v4l-utils qv4l2 v4l2ucp \
     curl unzip && \
     rm -rf /var/lib/apt/lists/*
-    
 
 #GET OPENCV sources
 WORKDIR /usr/local/src
@@ -73,12 +77,6 @@ RUN tar jxvf dlib-19.21.tar.bz2 && \
 RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt && \
 	cd torch2trt && \ 
 	python3 setup.py install
-
-# install cmake
-RUN apt-get install cmake -y libprotobuf-dev protobuf-compiler && \
-	pip3 install Cython && \
-    pip3 install onnx==1.10 
-
 
 # requirements
 RUN pip3 install scipy
