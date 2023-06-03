@@ -7,10 +7,6 @@ FROM nvcr.io/nvidia/l4t-pytorch:r32.6.1-pth1.9-py3
 #Required for libjasper-dev
 RUN echo "deb http://ports.ubuntu.com/ubuntu-ports/ xenial-security main restricted" | tee -a /etc/apt/sources.list
 
-# install cmake
-RUN apt-get install cmake -y libprotobuf-dev protobuf-compiler && \
-	pip3 install Cython && \
-    pip3 install onnx==1.10
 
 #INSTALL OPENCV dependencies
 RUN apt update && apt purge *libopencv* && apt install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \

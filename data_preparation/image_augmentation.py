@@ -26,11 +26,11 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
         augmenters.Flipud(p=0.5),  # Vertical flipping
         # augmenters.AllChannelsCLAHE(clip_limit=(0.01, )),  # Contrast enhancement
         augmenters.Affine(rotate=(-45, 45)),  # Rotation between -30 to 30 degrees
-        # augmenters.AdditiveGaussianNoise(scale=(0, 0.6 * 255)),  # Add Gaussian noise
+        augmenters.AdditiveGaussianNoise(scale=(0, 0.1 * 255)),  # Add Gaussian noise
         # augmenters.GammaContrast(gamma=(0.5, 2.0)),  # Gamma correction for contrast adjustment
         # augmenters.PerspectiveTransform(scale=(0.01, 0.1)),  # Perspective transformation
         # augmenters.Multiply((0.7, 1.3)),  # Multiply pixel values by a random value between 0.5 and 1.5
-        augmenters.Crop(px=(0, 1500)),  # Random cropping
+        augmenters.Crop(percent=(0, 0.1)),  # Random cropping
     ])
 
     # List of image file extensions to consider

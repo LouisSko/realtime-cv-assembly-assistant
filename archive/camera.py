@@ -121,7 +121,8 @@ def open_cam_onboard(width, height):
                    'videoconvert ! appsink').format(width, height)
     else:
         raise RuntimeError('onboard camera source not found!')
-    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER), gst_elements
+
 
 
 def grab_img(cam):
