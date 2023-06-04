@@ -26,8 +26,6 @@ def convert_image_to_png(image_dir, png_dir, drop_original=True):
         image.save(png_path, "PNG")
 
 
-
-
 def convert_image_to_jpeg(image_dir, jpeg_dir, drop_original=True):
     # List of image file extensions to consider
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".heic"]
