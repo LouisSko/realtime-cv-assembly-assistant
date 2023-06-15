@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Flex container for top section */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Image on the left */
+        .left-image {
+            width: 50px;
+            height: 50px;
+            /* Add any additional styles for the left image */
+        }
+
+        /* Title in the center */
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Image on the right */
+        .right-image {
+            width: 100px;
+        }
+
+        /* CSS styles for the layout */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #000;
+            margin: 20px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .image {
+            width: 100px;
+            height: auto;
+        }
+        .instruction-image {
+            width: 400px;
+            height: auto;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <img src="resources/lego.png" alt="Left Image" class="left-image">
+            <h1 class="title">LEGO Mindstorm: Real-time instruction manual</h1>
+            <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
+        </div>
+        <div class="divider"></div>
+            <div class="row buttons">
+                <p>Click the button below to start the live camera:</p>
+                <a href="/live" class="button go-button">GO</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
