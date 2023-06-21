@@ -89,10 +89,10 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
 if __name__ == "__main__":
 
     # Input directory path. Should contain a folder images and labels
-    input_dir = '/Users/louis.skowronek/aiss_images/train'
+    input_dir = '/Users/louis.skowronek/AISS/aiss_images/train'
 
     # Output directory path
-    output_dir = '/Users/louis.skowronek/aiss_images/train'
+    output_dir = '/Users/louis.skowronek/AISS/aiss_images/train'
 
     # Number of augmented images per image
     nr_of_augs = 10

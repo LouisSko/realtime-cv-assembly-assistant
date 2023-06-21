@@ -2,7 +2,7 @@ import cv2
 import os
 
 
-def generate_images_from_video(dir_video, file):
+def generate_images_from_video(dir_video, file, frames_per_second=1):
 
     cap = cv2.VideoCapture(os.path.join(dir_video, file))
 
@@ -21,7 +21,7 @@ def generate_images_from_video(dir_video, file):
     while cap.isOpened():
         success, img = cap.read()
 
-        if success and (it % fps == 0):
+        if success and (it % (fps*frames_per_second) == 0):
             file_name = file.split('.')[0]+'_'+str(f)+'.jpeg'
             cv2.imwrite(os.path.join(img_directory, file_name), img, [cv2.IMWRITE_JPEG_QUALITY, 100])
             f += 1
