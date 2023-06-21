@@ -7,7 +7,6 @@ from tqdm import tqdm
 from convert_yolo import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
 
 
-
 def image_augmentation(input_dir, output_dir, nr_of_augs=5):
 
     dir_images = os.path.join(input_dir, 'images')
@@ -25,8 +24,12 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
     seq = augmenters.Sequential([
         augmenters.Fliplr(p=0.5),  # Horizontal flipping
         augmenters.Flipud(p=0.5),  # Vertical flipping
-        augmenters.Affine(rotate=(-45, 45)),
-        augmenters.AdditiveGaussianNoise(scale=(0, 0.1 * 255)),  # Add Gaussian 
+        # augmenters.AllChannelsCLAHE(clip_limit=(0.01, )),  # Contrast enhancement
+        augmenters.Affine(rotate=(-45, 45)),  # Rotation between -30 to 30 degrees
+        augmenters.AdditiveGaussianNoise(scale=(0, 0.1 * 255)),  # Add Gaussian noise
+        # augmenters.GammaContrast(gamma=(0.5, 2.0)),  # Gamma correction for contrast adjustment
+        # augmenters.PerspectiveTransform(scale=(0.01, 0.1)),  # Perspective transformation
+        # augmenters.Multiply((0.7, 1.3)),  # Multiply pixel values by a random value between 0.5 and 1.5
         augmenters.Crop(percent=(0, 0.1)),  # Random cropping
     ])
 
