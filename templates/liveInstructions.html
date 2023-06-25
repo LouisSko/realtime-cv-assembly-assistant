@@ -116,48 +116,64 @@
                     <img class= "image instructionImg" id="instruction-image" src="{{ url_for('static', filename='1.jpeg') }}" alt="Instruction Image">
                 </div>
                 <div class="row buttons">
-                    <button id="next-button" class="button next-button">Back</button>
-                    <button id="last-button" class="button last-button">Next</button>
+                    <button id="last-button" class="button last-button">Back</button>
+                    <button id="next-button" class="button next-button">Next</button>
                 </div>
                 <script>
-                    // Get the instruction image element
-                    const instructionImage = document.getElementById('instruction-image');
-            
-                    // Get the Next and Last buttons
-                    const nextButton = document.getElementById('next-button');
-                    const lastButton = document.getElementById('last-button');
-            
-                    // Define an array of instruction image filenames
-                    const instructionImages = ['resources/1.jpeg', 'resources/2.jpeg', 'resources/3.jpeg', 'resources/4.jpeg', 'resources/5.jpeg', 'resources/6.jpeg', 'resources/7.jpeg', 'resources/8.jpeg', 'resources/9.jpeg', 'resources/10.jpeg', 'resources/11.jpeg', 'resources/12.jpeg', 'resources/13.jpeg', 'resources/14.jpeg', 'resources/15.jpeg'];
-            
-                    // Set the initial image index
-                    let currentImageIndex = 0;
-            
-                    // Function to update the instruction image source
-                    function updateInstructionImage() {
-                        const imageUrl = instructionImages[currentImageIndex];
-                        instructionImage.src = imageUrl;
-                    }
-            
-                    // Add event listeners for the Next and Last buttons
-                    lastButton.addEventListener('click', function() {
-                        currentImageIndex++;
-                        if (currentImageIndex >= instructionImages.length) {
-                            currentImageIndex = 0;
+                    document.addEventListener('DOMContentLoaded', () => {
+                        // Get the instruction image element
+                        const instructionImage = document.getElementById('instruction-image');
+                
+                        // Get the Next and Last buttons
+                        const nextButton = document.getElementById('next-button');
+                        const lastButton = document.getElementById('last-button');
+
+                        lastButton.addEventListener('click', () => {
+                            fetch('/previous', { method: 'POST' })
+                                .then(response => response.json())
+                                .then(data => {
+                                    updateUI(data.step, data.pieces);
+                                });
+                        });
+
+                        nextButton.addEventListener('click', () => {
+                            fetch('/next', { method: 'POST' })
+                                .then(response => response.json())
+                                .then(data => {
+                                    updateUI(data.step, data.pieces);
+                                    sendPieces(data.pieces);
+                                });
+                        });
+
+                        function updateUI(step, pieces) {
+                            // Update instruction image
+                            instructionImage.src = `/resources/${step}.jpeg`;
+
+                            // TODO: Update necessary pieces display
+
+                            // TODO: Update bounding boxes on video feed
+
+                            // TODO: Update other UI elements as needed
                         }
-                        updateInstructionImage();
-                    });
-            
-                    nextButton.addEventListener('click', function() {
-                        currentImageIndex--;
-                        if (currentImageIndex < 0) {
-                            currentImageIndex = instructionImages.length - 1;
+
+                        function sendPieces(pieces) {
+                            fetch('/send-pieces', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ pieces: pieces })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data.message);
+                            })
+                            .catch(error => {
+                                console.error('Error sending pieces:', error);
+                            });
                         }
-                        updateInstructionImage();
-                    });
-            
-                    // Call the updateInstructionImage function to display the initial image
-                    updateInstructionImage();
+
+                    })
             
                 </script>
             </div>

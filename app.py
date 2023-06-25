@@ -1,5 +1,5 @@
 import cv2
-from flask import Flask, render_template, Response, request
+from flask import Flask, jsonify, render_template, Response, request
 
 app = Flask(__name__, static_folder='resources')
 
@@ -93,6 +93,8 @@ def get_instruction(detected_pieces):
         return 15
     else:
         return 0
+    
+current_step = 1
 
 @app.route('/')
 def index():
@@ -101,7 +103,46 @@ def index():
 @app.route('/live')
 def live():
     instruction_image = '1.jpeg'
-    return render_template('liveInstructions.html', title='LEGO Mindstorm: Real-time instruction manual', instruction_image=instruction_image)
+    return render_template('liveInstructions.html', title='LEGO Mindstorm: Real-time instruction manual', 
+                           instruction_image=instruction_image, 
+                           step=current_step, pieces=STEPS[current_step])
+
+@app.route('/next', methods=['POST'])
+def next_step():
+    global current_step
+
+    # Increment the current step
+    current_step += 1
+
+    # Check if we have reached the maximum step
+    if current_step > 12:
+        current_step = 12
+
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+
+@app.route('/previous', methods=['POST'])
+def previous_step():
+    global current_step
+
+    # Decrement the current step
+    current_step -= 1
+
+    # Check if we have reached the minimum step
+    if current_step < 1:
+        current_step = 1
+
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+
+@app.route('/send-pieces', methods=['POST'])
+def send_pieces():
+    # Get the necessary pieces from the request payload
+    necessary_pieces = request.json['pieces']
+    print(necessary_pieces)
+
+    # TODO: Implement the logic to send the necessary pieces to the Jetson Nano
+
+    # Return a response to indicate successful processing
+    return jsonify({'message': 'Necessary pieces sent successfully'})
 
 @app.route('/video_feed')
 def video_feed():
