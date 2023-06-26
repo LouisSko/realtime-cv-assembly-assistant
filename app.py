@@ -115,8 +115,8 @@ def next_step():
     current_step += 1
 
     # Check if we have reached the maximum step
-    if current_step > 12:
-        current_step = 12
+    if current_step > 15:
+        current_step = 15
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
