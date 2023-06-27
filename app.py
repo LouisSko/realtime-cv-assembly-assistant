@@ -103,7 +103,7 @@ def index():
 @app.route('/live')
 def live():
     instruction_image = '1.jpeg'
-    return render_template('liveInstructions.html', title='LEGO Mindstorm: Real-time instruction manual', 
+    return render_template('liveInstructions.html', 
                            instruction_image=instruction_image, 
                            step=current_step, pieces=STEPS[current_step])
 
