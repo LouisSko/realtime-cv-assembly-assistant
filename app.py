@@ -59,50 +59,31 @@ def capture_camera():
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
     camera.release()
-
-def get_instruction(detected_pieces):
-    if STEPS[1] in detected_pieces:
-        return 1
-    elif STEPS[2] in detected_pieces:
-        return 2
-    elif STEPS[3] in detected_pieces:
-        return 3
-    elif STEPS[4] in detected_pieces:
-        return 4
-    elif STEPS[5] in detected_pieces:
-        return 5
-    elif STEPS[6] in detected_pieces:
-        return 6
-    elif STEPS[7] in detected_pieces:
-        return 7
-    elif STEPS[8] in detected_pieces:
-        return 8
-    elif STEPS[9] in detected_pieces:
-        return 9
-    elif STEPS[10] in detected_pieces:
-        return 10
-    elif STEPS[11] in detected_pieces:
-        return 11
-    elif STEPS[12] in detected_pieces:
-        return 12
-    elif STEPS[13] in detected_pieces:
-        return 13
-    elif STEPS[14] in detected_pieces:
-        return 14
-    elif STEPS[15] in detected_pieces:
-        return 15
-    else:
-        return 0
     
-current_step = 1
+current_mode = 'assembly'  # Default mode
+current_step = 1  # Default step for assembly mode
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/start', methods=['POST'])
+def start():
+    global current_mode, current_step
+
+    current_mode = request.json['mode']
+    if current_mode == 'assembly':
+        current_step = 1
+    elif current_mode == 'disassembly':
+        current_step = 15
+
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+
+
 @app.route('/live')
 def live():
-    instruction_image = '1.jpeg'
+    global current_step
+    instruction_image = 'resources/{}.jpeg'.format(current_step)
     return render_template('liveInstructions.html', 
                            instruction_image=instruction_image, 
                            step=current_step, pieces=STEPS[current_step])
@@ -148,11 +129,23 @@ def send_pieces():
 def video_feed():
     return Response(capture_camera(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/live', methods=['POST'])
-def detect():
-    detected_pieces = request.json.get('detected_pieces')
-    instruction_image = get_instruction(detected_pieces)
-    return render_template('liveInstructions.html', title='LEGO Mindstorm: Real-time instruction manual', instruction_image=str(instruction_image)+".jpeg")
+@app.route('/labels', methods=['POST'])
+def handle_labels():
+    global current_step
+
+    # TODO: Detected labels by Jetson Nano
+    detected_labels = []
+
+    missing_labels = []
+
+    for label in STEPS[current_step]:
+        if label not in detected_labels:
+            missing_labels.append(label)
+
+    if len(missing_labels)>0:
+        return jsonify({'message': 'Necessary pieces were not found.', 'missing': missing_labels})
+    else:
+        return jsonify({'message': 'Necessary pieces sent successfully.', 'missing': missing_labels})
 
 if __name__ == '__main__':
     app.run()

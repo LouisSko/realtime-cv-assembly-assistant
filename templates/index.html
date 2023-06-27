@@ -76,6 +76,18 @@
             box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
             border-radius: 8px;
         }
+        .assembly-button{
+            background-color: #C91A09;
+            color:#FFFFFF
+        }
+        .disassembly-button{
+            background-color: #009682;
+            color:#FFFFFF
+        }
+        .btn-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +102,36 @@
                 <p>Click the button below to start the live camera:</p>
                 <a href="/live" class="button go-button">GO</a>
             </div>
+            <div class="mode-selection">
+                <button id="assembly-btn" class="button assembly-button">Assembly</button>
+                <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const assemblyBtn = document.getElementById('assembly-btn');
+                    const disassemblyBtn = document.getElementById('disassembly-btn');
+                    const goBtn = document.getElementById('go-btn');
+
+                    assemblyBtn.addEventListener('click', () => {
+                        start('assembly');
+                    });
+
+                    disassemblyBtn.addEventListener('click', () => {
+                        start('disassembly');
+                    });
+
+                    function start(mode) {
+                        fetch('/start', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ mode: mode })
+                        })
+                            .then(response => response.json())
+                    }
+                })
+            </script>
         </div>
     </div>
 </body>
