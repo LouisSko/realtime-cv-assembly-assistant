@@ -14,7 +14,7 @@ from yolov8 import YOLOv8
 # out = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), cap.get(cv2.CAP_PROP_FPS), (3840, 2160))
 
 # Initialize YOLOv7 model
-model_path = '/Users/louis.skowronek/AISS/best.onnx'
+model_path = '../models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 cap = cv2.VideoCapture('/Users/louis.skowronek/AISS/generate_images/IMG_4594.MOV')
