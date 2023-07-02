@@ -64,6 +64,7 @@ def capture_camera():
 current_mode = 'assembly'  # Default mode
 current_step = 1  # Default step for assembly mode
 detection_results = []
+necessary_pieces = []
 
 @app.route('/')
 def index():
@@ -118,6 +119,7 @@ def previous_step():
 
 @app.route('/send-pieces', methods=['POST'])
 def send_pieces():
+    global necessary_pieces
     # Get the necessary pieces from the request payload
     necessary_pieces = request.json['pieces']
     print(necessary_pieces)
@@ -126,6 +128,10 @@ def send_pieces():
 
     # Return a response to indicate successful processing
     return jsonify({'message': 'Necessary pieces sent successfully'})
+
+@app.route('/send-pieces', methods=['GET'])
+def get_pieces():
+    return jsonify(necessary_pieces)
 
 '''
 @app.route('/video_feed')
