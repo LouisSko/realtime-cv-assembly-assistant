@@ -1,5 +1,6 @@
 import cv2
 from flask import Flask, jsonify, render_template, Response, request
+import requests
 
 app = Flask(__name__, static_folder='resources')
 
@@ -62,6 +63,7 @@ def capture_camera():
     
 current_mode = 'assembly'  # Default mode
 current_step = 1  # Default step for assembly mode
+detection_results = []
 
 @app.route('/')
 def index():
@@ -125,27 +127,58 @@ def send_pieces():
     # Return a response to indicate successful processing
     return jsonify({'message': 'Necessary pieces sent successfully'})
 
+'''
 @app.route('/video_feed')
 def video_feed():
     return Response(capture_camera(), mimetype='multipart/x-mixed-replace; boundary=frame')
+'''
+
+@app.route('/detections', methods=['POST'])
+def handle_detections():
+    global detection_results
+    # Get the detection results from the request
+    detection_results = request.get_json()
+    print(detection_results)
+
+    # Process the detection results
+    for detection in detection_results:
+        label = detection['label']
+        confidence = detection['confidence']
+        bounding_box = detection['bounding_box']
+    
+        # Perform further processing or storage of the detection results here
+
+    # Return a response indicating successful handling of the detection results
+    return 'Detection results received and processed'
+
+@app.route('/detections', methods=['GET'])
+def get_detections():
+    return jsonify(detection_results)
 
 @app.route('/labels', methods=['POST'])
 def handle_labels():
-    global current_step
+    global current_step, current_mode, detection_results
 
-    # TODO: Detected labels by Jetson Nano
-    detected_labels = []
-
+    print(detection_results)
     missing_labels = []
 
     for label in STEPS[current_step]:
-        if label not in detected_labels:
-            missing_labels.append(label)
+            if label not in detection_results:
+                missing_labels.append(label)
 
-    if len(missing_labels)>0:
-        return jsonify({'message': 'Necessary pieces were not found.', 'missing': missing_labels})
+    if current_mode == 'assembly':
+
+        if len(missing_labels)>0:
+            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.', 'missing': missing_labels})
+        else:
+            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.', 'missing': missing_labels})
+        
     else:
-        return jsonify({'message': 'Necessary pieces sent successfully.', 'missing': missing_labels})
+        if len(missing_labels)>0:
+            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.', 'missing': missing_labels})
+        else:
+            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.', 'missing': missing_labels})
+        
 
 if __name__ == '__main__':
     app.run()

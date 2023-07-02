@@ -77,11 +77,11 @@
             border-radius: 8px;
         }
         .assembly-button{
-            background-color: #C91A09;
+            background-color: #009682;
             color:#FFFFFF
         }
         .disassembly-button{
-            background-color: #009682;
+            background-color: #C91A09;
             color:#FFFFFF
         }
         .btn-disabled {
@@ -98,13 +98,28 @@
             <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
         </div>
         <div class="divider"></div>
-            <div class="row buttons">
-                <p>Click the button below to start the live camera:</p>
-                <a href="/live" class="button go-button">GO</a>
+            <div class="paragraph">
+                <p>Welcome to the LEGO Piece Identification and Assembly Web App!</p>
+            </div>
+            <div class="paragraph">
+                <p>Are you ready to embark on an exciting journey of LEGO building? This web app, powered by the Jetson Nano and an intelligent camera, is here to assist you in identifying LEGO pieces and guiding you through the assembly process with ease.</p>
+            </div>
+            <div class="paragraph">
+                <p>Whether you're a LEGO enthusiast, a beginner looking to learn, or simply seeking a fun and interactive experience, this web app is designed to enhance your building adventure. With its advanced object detection capabilities, it can recognize various LEGO pieces in real-time, allowing you to focus on the joy of creation.</p>
+            </div>
+            <div class="paragraph">
+                <p>Here's how it works: simply decide whether you want to assemble or disassemble your LEGO Mindstorm set. The camera will analyze the pieces you're working with and provide real-time feedback on their correct placement and order.</p>
+            </div>
+            <div class="paragraph">
+                <p>But that's not all! The web app goes beyond just identification. It also offers a step-by-step instruction guide, displaying visual cues and highlighting the required pieces for each stage of the building process. Whether you're assembling a complex structure or carefully disassembling a set, the app will be your faithful companion, ensuring accuracy and guiding you towards the perfect outcome.</p>
+            </div>
+            <div class="paragraph">
+                <p>ENJOY!</p>
             </div>
             <div class="mode-selection">
                 <button id="assembly-btn" class="button assembly-button">Assembly</button>
                 <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
+                <a href="/live" class="button go-button">GO</a>
             </div>
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
