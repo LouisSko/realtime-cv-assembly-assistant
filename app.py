@@ -66,10 +66,12 @@ current_step = 1  # Default step for assembly mode
 detection_results = []
 necessary_pieces = []
 
+# Load Homepage
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Set mode and first instruction
 @app.route('/start', methods=['POST'])
 def start():
     global current_mode, current_step
@@ -82,7 +84,7 @@ def start():
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
-
+# Load live instructions
 @app.route('/live')
 def live():
     global current_step
@@ -91,6 +93,7 @@ def live():
                            instruction_image=instruction_image, 
                            step=current_step, pieces=STEPS[current_step])
 
+# Go to next instruction step
 @app.route('/next', methods=['POST'])
 def next_step():
     global current_step
@@ -104,6 +107,7 @@ def next_step():
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
+# Go to previous instruction step
 @app.route('/previous', methods=['POST'])
 def previous_step():
     global current_step
@@ -117,6 +121,7 @@ def previous_step():
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
+# POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
 def send_pieces():
     global necessary_pieces
@@ -124,11 +129,10 @@ def send_pieces():
     necessary_pieces = request.json['pieces']
     print(necessary_pieces)
 
-    # TODO: Implement the logic to send the necessary pieces to the Jetson Nano
-
     # Return a response to indicate successful processing
     return jsonify({'message': 'Necessary pieces sent successfully'})
 
+# GET all necssary pices of current instruction stepp
 @app.route('/send-pieces', methods=['GET'])
 def get_pieces():
     return jsonify(necessary_pieces)
@@ -139,6 +143,7 @@ def video_feed():
     return Response(capture_camera(), mimetype='multipart/x-mixed-replace; boundary=frame')
 '''
 
+# POST detected pieces
 @app.route('/detections', methods=['POST'])
 def handle_detections():
     global detection_results
@@ -146,21 +151,15 @@ def handle_detections():
     detection_results = request.get_json()
     print(detection_results)
 
-    # Process the detection results
-    for detection in detection_results:
-        label = detection['label']
-        confidence = detection['confidence']
-        bounding_box = detection['bounding_box']
-    
-        # Perform further processing or storage of the detection results here
-
     # Return a response indicating successful handling of the detection results
-    return 'Detection results received and processed'
+    return 'Detection results received.'
 
+# GET detected pieces
 @app.route('/detections', methods=['GET'])
 def get_detections():
     return jsonify(detection_results)
 
+# POST results of check
 @app.route('/labels', methods=['POST'])
 def handle_labels():
     global current_step, current_mode, detection_results
