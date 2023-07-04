@@ -138,3 +138,58 @@ def draw_comparison(img1, img2, name1, name2, fontsize=2.6, text_thickness=3):
         combined_img = cv2.resize(combined_img, (3840, 2160))
 
     return combined_img
+
+
+class MotionDetector:
+    def __init__(self, threshold=30, th_diff=0.3, skip_frames=30):
+        self.threshold = threshold
+        self.th_diff = th_diff
+        self.skip_frames = skip_frames
+        self.prev_frame = None
+        self.comparison_frame_counter = 0
+        self.motion_flag = True
+
+    def set_skip_frames(self):
+        if self.motion_flag:
+            self.skip_frames = 15
+        else:
+            self.skip_frames = 15
+
+    def detect_motion(self, frame):
+        if self.prev_frame is None:
+            self.prev_frame = frame
+            return False
+
+        self.comparison_frame_counter += 1
+
+        if self.comparison_frame_counter >= self.skip_frames:
+            # reset comparison counter
+            self.comparison_frame_counter = 0
+
+            # Convert frames to grayscale
+            prev_frame_gray = cv2.cvtColor(self.prev_frame, cv2.COLOR_BGR2GRAY)
+            frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            # Perform absolute difference between the current and previous frames
+            frame_diff = cv2.absdiff(frame_gray, prev_frame_gray)
+
+            # Apply thresholding to obtain a binary image
+            _, thresholded_diff = cv2.threshold(frame_diff, self.threshold, 255, cv2.THRESH_BINARY)
+
+            # Count the number of non-zero pixels (white pixels) in the thresholded difference image
+            motion_pixels = cv2.countNonZero(thresholded_diff)
+
+            # calculate threshold
+            total_pixels = self.prev_frame.shape[0] * self.prev_frame.shape[1]
+            motion_pixels = cv2.countNonZero(thresholded_diff)
+
+            # update prev_frame
+            self.prev_frame = frame
+
+            # if more than th_diff of the pixels are different return true
+            if motion_pixels / total_pixels > self.th_diff:
+                self.motion_flag = True
+            else:
+                self.motion_flag = False
+
+        return self.motion_flag

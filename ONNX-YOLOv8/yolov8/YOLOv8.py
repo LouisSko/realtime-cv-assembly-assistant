@@ -9,14 +9,36 @@ from yolov8.utils import xywh2xyxy, nms, draw_detections
 class YOLOv8:
 
     def __init__(self, path, conf_thres=0.7, iou_thres=0.5):
+        self.input_width = None
+        self.input_height = None
+        self.output_names = None
+        self.input_shape = None
+        self.input_names = None
+        self.img_width = None
+        self.img_height = None
+        self.class_ids = []
+        self.scores = []
+        self.boxes = []
+        self.comparison_frame_counter = 0
         self.conf_threshold = conf_thres
         self.iou_threshold = iou_thres
+        self.motion_prev = True
 
         # Initialize model
         self.initialize_model(path)
 
-    def __call__(self, image):
-        return self.detect_objects(image)
+    def __call__(self, image, motion, skip_frames):
+
+        if self.motion_prev != motion:
+            return self.detect_objects(image)
+
+        else:
+            # detect objects every n frames
+            self.comparison_frame_counter += 1
+            if self.comparison_frame_counter >= skip_frames:
+                # reset comparison counter
+                self.comparison_frame_counter = 0
+                return self.detect_objects(image)
 
     def initialize_model(self, path):
         self.session = onnxruntime.InferenceSession(path,
@@ -25,7 +47,6 @@ class YOLOv8:
         # Get model info
         self.get_input_details()
         self.get_output_details()
-
 
     def detect_objects(self, image):
         input_tensor = self.prepare_input(image)
@@ -36,7 +57,6 @@ class YOLOv8:
         self.boxes, self.scores, self.class_ids = self.process_output(outputs)
 
         return self.boxes, self.scores, self.class_ids
-
 
     def prepare_input(self, image):
         self.img_height, self.img_width = image.shape[:2]
@@ -52,7 +72,6 @@ class YOLOv8:
         input_tensor = input_img[np.newaxis, :, :, :].astype(np.float32)
 
         return input_tensor
-
 
     def inference(self, input_tensor):
         start = time.perf_counter()

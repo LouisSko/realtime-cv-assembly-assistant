@@ -7,6 +7,7 @@
 
 import cv2
 from yolov8.YOLOv8 import YOLOv8
+from yolov8.utils import MotionDetector
 import time
 """ 
 gstreamer_pipeline returns a GStreamer pipeline for capturing from the CSI camera
@@ -19,9 +20,11 @@ def gstreamer_pipeline(
     sensor_id=0,
     capture_width=3246,
     capture_height=1848,
+    # capture_width=1280,
+    # capture_height=720,
     display_width=1280,
     display_height=720,
-    framerate=10,
+    framerate=21,
     flip_method=0,
 ):
     return (
@@ -42,8 +45,10 @@ def gstreamer_pipeline(
         )
     )
 
-model_path = '../models/yolov8n_best.onnx'
+model_path = '../models/yolov8n_black3.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
+motion_detector = MotionDetector(threshold=20, th_diff=0.01, skip_frames=10)
+
 
 def detections():
     window_title = "CSI Camera"
@@ -60,16 +65,25 @@ def detections():
                 if frame is None:  # timeout
                     continue
 
-                # Update object localizer
-                boxes, scores, class_ids = yolov8_detector(frame)
+                # check whether there is motion in the image
+                motion = motion_detector.detect_motion(frame)
 
-                combined_img = yolov8_detector.draw_detections(frame)
+                # Update object localizer if there is no motion in the image
+                if not motion:
+                    # Update object localizer every n frames. It calculates boxes, scores, class_ids
+                    yolov8_detector(frame, motion, skip_frames=10)
+
+                    # immer wenn motion false ist, muss er predicten
+                    frame = yolov8_detector.draw_detections(frame)
+
+                # store information about previous motion
+                yolov8_detector.motion_prev = motion
 
                 # Check to see if the user closed the window
                 # Under GTK+ (Jetson Default), WND_PROP_VISIBLE does not work correctly. Under Qt it does
                 # GTK - Substitute WND_PROP_AUTOSIZE to detect if window has been closed by user
                 if cv2.getWindowProperty(window_title, cv2.WND_PROP_AUTOSIZE) >= 0:
-                    cv2.imshow("Object Detection with YOLO V8", combined_img)
+                    cv2.imshow("Object Detection with YOLO V8", frame)
 
                 else:
                     break
