@@ -56,8 +56,11 @@ net = detectNet(args.network, sys.argv, args.threshold)
 
 # note: to hard-code the paths to load a model, the following API can be used:
 #
-net = detectNet(model="lego.onnx", labels="labels.txt",
-                 input_blob="input_0", output_cvg="scores", output_bbox="boxes",
+#net = detectNet(model="lego.onnx", labels="labels.txt",
+#                 input_blob="input_0", output_cvg="scores", output_bbox="boxes",
+#                 threshold=0.5)
+net = detectNet(model="yolov8n_best.onnx", labels="labels.txt",
+                 input_blob="images", output_cvg="scores", output_bbox="boxes",
                  threshold=0.5)
 
 # process frames until EOS or the user exits
@@ -71,7 +74,7 @@ while True:
 
     # detect objects in the image (with overlay)
     detections = net.Detect(img, overlay=args.overlay)
-    cudaDrawRect(img, (200, 25, 350, 250), (255, 127, 0, 200))
+    # cudaDrawRect(img, (200, 25, 350, 250), (255, 127, 0, 200))
 
     # print the detections
     print("detected {:d} objects in image".format(len(detections)))

@@ -1,9 +1,16 @@
 #path: 
-train: /Users/louis.skowronek/aiss_images/train/images 
-val: /Users/louis.skowronek/aiss_images/val/images 
-test: /Users/louis.skowronek/aiss_images/test/images 
+train: /Users/louis.skowronek/AISS/aiss_images/train/images
+val: /Users/louis.skowronek/AISS/aiss_images/val/images
+test: /Users/louis.skowronek/AISS/aiss_images/test/images
 
 nc: 18
 
 # Classes
 names: ['grey1', 'grey2', 'grey3', 'grey4', 'grey5', 'black1', 'black2', 'black3', 'red1', 'red2', 'blue1', 'blue2', 'white1', 'white2', 'white3', 'engine', 'wheel', 'wire']
+
+# data augmentation settings
+# Mosaic augmentation
+augment: True
+mosaic: 1.0  # probability of applying mosaic augmentation
+mixup: 0.0  # probability of applying mixup augmentation
+degrees: 45
