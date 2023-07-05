@@ -58,23 +58,24 @@ while cap.isOpened():
         detection_results = []
 
         # Format the detection results
-        for i in range(0,boxes):
-            result = {
-                'label': class_ids[i],
-                'confidence': scores[i],
-                'boxes': boxes[i]
-            }
-            detection_results.append(result)
+        if len(boxes)>0:
+            for i in range(0,len(boxes)):
+                result = {
+                    'label': str(class_ids[i]),
+                    'confidence': str(scores[i]),
+                    'boxes': str(boxes[i])
+                }
+                detection_results.append(result)
 
-        url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, json=detection_results, headers=headers)
+            url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(url, json=detection_results, headers=headers)
 
-        # Check the response status code
-        if response.status_code == 200:
-            print("Detection results sent successfully")
-        else:
-            print("Error sending detection results")
+            # Check the response status code
+            if response.status_code == 200:
+                print("Detection results sent successfully")
+            else:
+                print("Error sending detection results")
 
     yolov8_detector.motion_prev = motion
 
