@@ -2,14 +2,16 @@ import cv2
 import os
 
 
-def generate_images_from_video(dir_video, file, frames_per_second=1):
+def generate_images_from_video(dir_video, file, dir_save=None, frames_per_second=1):
 
+    if dir_save is None:
+        dir_save=dir_video
     cap = cv2.VideoCapture(os.path.join(dir_video, file))
 
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     # make image directory if necessary
-    img_directory = os.path.join(dir_video, 'images')
+    img_directory = os.path.join(dir_save, 'images')
     if not os.path.exists(img_directory):
         os.makedirs(img_directory)
 
@@ -36,6 +38,7 @@ def generate_images_from_video(dir_video, file, frames_per_second=1):
 
 
 if __name__ == "__main__":
-    file_video ='IMG_4580.MOV'
-    dir_video = '/Users/louis.skowronek/Downloads/generate_images'
-    generate_images_from_video(dir_video, file_video)
+    file_video ='grey_axle_short_and_grey_axle_long.mp4'
+    dir_video = '/Users/louis.skowronek/object-detection-project/videos/'
+    dir_save = '/Users/louis.skowronek/AISS/generate_images/grey_axle_short_and_grey_axle_long.mp4'
+    generate_images_from_video(dir_video, file_video, dir_save)
