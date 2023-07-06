@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Flex container for top section */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Image on the left */
+        .left-image {
+            width: 50px;
+            height: 50px;
+            /* Add any additional styles for the left image */
+        }
+
+        /* Title in the center */
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Image on the right */
+        .right-image {
+            width: 100px;
+        }
+
+        /* CSS styles for the layout */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #000;
+            margin: 20px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .image {
+            width: 100px;
+            height: auto;
+        }
+        .instruction-image {
+            width: 400px;
+            height: auto;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+        }
+        .assembly-button{
+            background-color: #009682;
+            color:#FFFFFF
+        }
+        .disassembly-button{
+            background-color: #C91A09;
+            color:#FFFFFF
+        }
+        .btn-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <img src="resources/lego.png" alt="Left Image" class="left-image">
+            <h1 class="title">LEGO Mindstorm: Real-time instruction manual</h1>
+            <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
+        </div>
+        <div class="divider"></div>
+            <div class="paragraph">
+                <p>Welcome to the LEGO Piece Identification and Assembly Web App!</p>
+            </div>
+            <div class="paragraph">
+                <p>Are you ready to embark on an exciting journey of LEGO building? This web app, powered by the Jetson Nano and an intelligent camera, is here to assist you in identifying LEGO pieces and guiding you through the assembly process with ease.</p>
+            </div>
+            <div class="paragraph">
+                <p>Whether you're a LEGO enthusiast, a beginner looking to learn, or simply seeking a fun and interactive experience, this web app is designed to enhance your building adventure. With its advanced object detection capabilities, it can recognize various LEGO pieces in real-time, allowing you to focus on the joy of creation.</p>
+            </div>
+            <div class="paragraph">
+                <p>Here's how it works: simply decide whether you want to assemble or disassemble your LEGO Mindstorm set. The camera will analyze the pieces you're working with and provide real-time feedback on their correct placement and order.</p>
+            </div>
+            <div class="paragraph">
+                <p>But that's not all! The web app goes beyond just identification. It also offers a step-by-step instruction guide, displaying visual cues and highlighting the required pieces for each stage of the building process. Whether you're assembling a complex structure or carefully disassembling a set, the app will be your faithful companion, ensuring accuracy and guiding you towards the perfect outcome.</p>
+            </div>
+            <div class="paragraph">
+                <p>ENJOY!</p>
+            </div>
+            <div class="mode-selection">
+                <button id="assembly-btn" class="button assembly-button">Assembly</button>
+                <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
+                <a href="/live" class="button go-button">GO</a>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const assemblyBtn = document.getElementById('assembly-btn');
+                    const disassemblyBtn = document.getElementById('disassembly-btn');
+                    const goBtn = document.getElementById('go-btn');
+
+                    assemblyBtn.addEventListener('click', () => {
+                        start('assembly');
+                    });
+
+                    disassemblyBtn.addEventListener('click', () => {
+                        start('disassembly');
+                    });
+
+                    function start(mode) {
+                        fetch('/start', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ mode: mode })
+                        })
+                            .then(response => response.json())
+                    }
+                })
+            </script>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Flex container for top section */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Image on the left */
+        .left-image {
+            width: 50px;
+            height: 50px;
+            /* Add any additional styles for the left image */
+        }
+
+        /* Title in the center */
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Image on the right */
+        .right-image {
+            width: 100px;
+        }
+
+        /* CSS styles for the layout */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #000;
+            margin: 20px 0;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .left-column {
+            flex: 1;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+        .right-column {
+            flex: 1;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+        .live-video {
+            width: 100%;
+            height: auto;
+        }
+        .image {
+            width: 100px;
+            height: auto;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background: #FFFFFF;
+            border: 1px solid #000000;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+        }
+        .last-button{
+            background-color: #C91A09;
+            color:#FFFFFF
+        }
+        .next-button{
+            background-color: #009682;
+            color:#FFFFFF
+        }
+        .instructionImg{
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <img src="resources/lego.png" alt="Left Image" class="left-image">
+            <h1 class="title">LEGO Mindstorm: Real-time instruction manual</h1>
+            <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+            <div class="left-column">
+                <div class="row">
+                    <p id="net-response"></p>
+                </div>
+                <div class="row">
+                    <button id="check-button" class="button check-button">Check Labels</button>
+                </div>
+            </div>
+            <div class="right-column">
+                <div class="row">
+                    <img class= "image instructionImg" id="instruction-image" src="{{ instruction_image }}" alt="Instruction Image">
+                </div>
+                <div class="row buttons">
+                    <button id="last-button" class="button last-button">Back</button>
+                    <button id="next-button" class="button next-button">Next</button>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        // Get the instruction image element
+                        const instructionImage = document.getElementById('instruction-image');
+                
+                        // Get all buttons
+                        const nextButton = document.getElementById('next-button');
+                        const lastButton = document.getElementById('last-button');
+                        const checkButton = document.getElementById('check-button');
+
+                        // Get paragraph to display response
+                        const netResponse = document.getElementById('net-response')
+
+                        lastButton.addEventListener('click', () => {
+                            fetch('/previous', { method: 'POST' })
+                                .then(response => response.json())
+                                .then(data => {
+                                    updateUI(data.step, data.pieces);
+                                    sendPieces(data.pieces);
+                                });
+                        });
+
+                        nextButton.addEventListener('click', () => {
+                            fetch('/next', { method: 'POST' })
+                                .then(response => response.json())
+                                .then(data => {
+                                    updateUI(data.step, data.pieces);
+                                    sendPieces(data.pieces);
+                                });
+                        });
+
+                        checkButton.addEventListener('click', () => {
+                            fetch('/detections') // Get the detections
+                                .then(response => response.json())
+                                .then(detections => {
+                                    // Perform checks on the detections
+                                    fetch('/labels', { method: 'POST' })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            updateLabeling(data.message);
+                                        });
+                                });
+                        });
+
+                        function updateUI(step, pieces) {
+                            // Update instruction image
+                            instructionImage.src = `/resources/${step}.jpeg`;
+
+                            // TODO: Update bounding boxes on video feed
+                        }
+
+                        function updateLabeling(response) {
+                            netResponse.textContent = response
+                        }
+
+                        function sendPieces(pieces) {
+                            fetch('/send-pieces', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ pieces: pieces })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data.message);
+                            })
+                            .catch(error => {
+                                console.error('Error sending pieces:', error);
+                            });
+                        }
+                        sendPieces("{{ pieces }}")
+
+                    })
+            
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
