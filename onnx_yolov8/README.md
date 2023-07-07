@@ -12,7 +12,7 @@
 # Installation
 ```shell
 git clone https://github.com/ibaiGorordo/ONNX-YOLOv8-Object-Detection.git
-cd ONNX-YOLOv8-Object-Detection
+cd onnx_yolov8-Object-Detection
 pip install -r requirements.txt
 ```
 ### ONNX Runtime
