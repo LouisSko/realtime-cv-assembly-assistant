@@ -2,7 +2,7 @@ import cv2
 from flask import Flask, jsonify, render_template, Response, request
 import requests
 
-from onnx_yolov8.yolov8 import YOLOv8
+from onnx_yolov8.yolov8.YOLOv8 import YOLOv8
 from onnx_yolov8.yolov8.utils import MotionDetector
 
 app = Flask(__name__, static_folder='resources')
@@ -47,8 +47,8 @@ STEPS = {
 }
 
 # Initialize YOLOv8 model
-#model_path = '../models/yolov8n_best.onnx'
-#yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
+model_path = 'onnx_yolov8/yolov8/yolov8n_best.onnx'
+yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # Initialize video
 cap = cv2.VideoCapture('videos/IMG_4594.MOV')
@@ -56,7 +56,7 @@ cap = cv2.VideoCapture('videos/IMG_4594.MOV')
 cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
 
 # th_diff=1 basically diables the detection
-#motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
+motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
 def capture_camera():
     while cap.isOpened():

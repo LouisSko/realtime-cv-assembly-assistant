@@ -3,8 +3,7 @@ import cv2
 import numpy as np
 import onnxruntime
 
-from yolov8.utils import xywh2xyxy, nms, draw_detections
-
+from onnx_yolov8.yolov8.utils import xywh2xyxy, nms, draw_detections
 
 class YOLOv8:
 

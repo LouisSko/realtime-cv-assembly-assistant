@@ -36,5 +36,5 @@ def build_engine(onnx_file_path):
 
 
 if __name__ == "__main__":
-    onnx_file_path = '../models/yolov8n_best.onnx'
+    onnx_file_path = 'yolov8/yolov8n_best.onnx'
     engine = build_engine(onnx_file_path)

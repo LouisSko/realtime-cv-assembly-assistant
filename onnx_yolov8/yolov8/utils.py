@@ -4,7 +4,7 @@ import os
 
 
 #define the labels
-labels_path = 'classes.txt'
+labels_path = 'onnx_yolov8/yolov8/classes.txt'
 try:
     class_names = [name.strip() for name in open(labels_path).readlines()]
 except:
