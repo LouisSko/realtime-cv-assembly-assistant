@@ -1,19 +1,17 @@
 import cv2
-from yolov8 import YOLOv8
-import cv2
-
-import cv2
-from yolov8.utils import MotionDetector
-
+from onnx_yolov8.yolov8.YOLOv8 import YOLOv8
+from onnx_yolov8.yolov8.utils import MotionDetector
 import requests
+import os
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Initialize YOLOv8 model
-model_path = 'models/yolov8n_best.onnx'
+model_path = '../models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # Initialize video
-cap = cv2.VideoCapture('videos/IMG_4594.MOV')
+cap = cv2.VideoCapture('../videos/IMG_4594.MOV')
 
 cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
 
@@ -39,12 +37,11 @@ while cap.isOpened():
     pieces_url = 'http://127.0.0.1:5000/send-pieces'
     response = requests.get(pieces_url)
     if response.status_code == 200:
-        pieces = response.json() # is a list of labels e.g. ['grey4', 'wire']
+        pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
 
         print(pieces)
     else:
         print('Error:', response.status_code)
-       
 
     # check whether there is motion in the image
     motion = motion_detector.detect_motion(frame)

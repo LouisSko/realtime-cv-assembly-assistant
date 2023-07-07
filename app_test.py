@@ -47,7 +47,7 @@ STEPS = {
 }
 
 # Initialize YOLOv8 model
-model_path = 'onnx_yolov8/yolov8/yolov8n_best.onnx'
+model_path = 'models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # Initialize video
@@ -83,7 +83,7 @@ def capture_camera():
         pieces_url = 'http://127.0.0.1:5000/send-pieces'
         response = requests.get(pieces_url)
         if response.status_code == 200:
-            pieces = response.json() # is a list of labels e.g. ['grey4', 'wire']
+            pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
 
             print(pieces)
         else:

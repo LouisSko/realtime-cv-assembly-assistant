@@ -4,11 +4,18 @@ import os
 
 
 #define the labels
-labels_path = 'onnx_yolov8/yolov8/classes.txt'
+
+# Get the directory path of the current file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the relative path to the file you want to access
+labels_path = os.path.join(current_dir, 'classes.txt')
+
+#labels_path = '/object-detection-project/onnx_yolov8/yolov8/classes.txt'
 try:
     class_names = [name.strip() for name in open(labels_path).readlines()]
 except:
-    print(f"Error while reading {labels_path}. Go into ONNX-YOLOv8/yolov8/utils.py to change the path to classes.txt")
+    print(f"Error while reading {labels_path}. Go into utils.py to change the path to classes.txt")
 
 # Create a list of colors for each class where each color is a tuple of 3 integer values
 rng = np.random.default_rng(3)
