@@ -39,6 +39,6 @@ def generate_images_from_video(dir_video, file, dir_save=None, frames_per_second
 
 if __name__ == "__main__":
     file_video ='grey_axle_short_and_grey_axle_long.mp4'
-    dir_video = '/Users/louis.skowronek/object-detection-project/videos/'
+    dir_video = '/videos/'
     dir_save = '/Users/louis.skowronek/AISS/generate_images/grey_axle_short_and_grey_axle_long.mp4'
     generate_images_from_video(dir_video, file_video, dir_save)

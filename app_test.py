@@ -2,8 +2,8 @@ import cv2
 from flask import Flask, jsonify, render_template, Response, request
 import requests
 
-from onnx_yolov8.yolov8.YOLOv8 import YOLOv8
-from onnx_yolov8.yolov8.utils import MotionDetector
+from onnx_yolov8.YOLOv8 import YOLOv8
+from onnx_yolov8.utils import MotionDetector
 
 app = Flask(__name__, static_folder='resources')
 

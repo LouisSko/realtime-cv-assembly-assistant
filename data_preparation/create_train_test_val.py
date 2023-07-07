@@ -66,10 +66,10 @@ def move_files(file_list, input_dir, output_dir):
 
 if __name__ == "__main__":
     # Input directory path. Should contain a folder images and labels
-    input_directory = '/Users/louis.skowronek/AISS/yolo_images'
+    input_directory = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
 
     # Output directory path
-    output_directory = '/Users/louis.skowronek/AISS/yolo_images'
+    output_directory = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
 
     # Split ratio (train, test, val)
     split_ratio = (0.8, 0.1, 0.1)
