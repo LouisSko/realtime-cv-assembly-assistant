@@ -9,11 +9,11 @@ import requests
 
 
 # Initialize YOLOv8 model
-model_path = '../models/yolov8n_best.onnx'
+model_path = 'models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # Initialize video
-cap = cv2.VideoCapture('../videos/IMG_4594.MOV')
+cap = cv2.VideoCapture('videos/IMG_4594.MOV')
 
 cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
 
@@ -44,6 +44,7 @@ while cap.isOpened():
         print(pieces)
     else:
         print('Error:', response.status_code)
+       
 
     # check whether there is motion in the image
     motion = motion_detector.detect_motion(frame)
@@ -52,7 +53,7 @@ while cap.isOpened():
     if not motion:
         boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
 
-        frame = yolov8_detector.draw_detections(frame)
+        frame = yolov8_detector.draw_detections(frame, required_class_ids = pieces)
 
         # Create a list to store the detection results
         detection_results = []
