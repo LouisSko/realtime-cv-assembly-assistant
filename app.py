@@ -137,7 +137,7 @@ def send_pieces():
 def get_pieces():
     return jsonify(necessary_pieces)
 
-'''
+
 @app.route('/video_feed')
 def video_feed():
     return Response(capture_camera(), mimetype='multipart/x-mixed-replace; boundary=frame')
