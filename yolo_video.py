@@ -39,9 +39,9 @@ while cap.isOpened():
     response = requests.get(pieces_url)
     if response.status_code == 200:
         pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
-
         print(pieces)
     else:
+        pieces = None
         print('Error:', response.status_code)
 
     # check whether there is motion in the image
@@ -51,7 +51,7 @@ while cap.isOpened():
     if not motion:
         boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
 
-        frame = yolov8_detector.draw_detections(frame, required_class_ids=None)
+        frame = yolov8_detector.draw_detections(frame, required_class_ids = pieces)
 
         # Create a list to store the detection results
         detection_results = []

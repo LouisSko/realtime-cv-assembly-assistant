@@ -125,8 +125,7 @@ class YOLOv8:
 
     def draw_detections(self, image, required_class_ids, draw_scores=True, mask_alpha=0.2):
 
-        return draw_detections(image, required_class_ids, self.boxes, self.scores,
-                               self.class_ids, mask_alpha)
+        return draw_detections(image, self.boxes, self.scores, self.class_ids, required_class_ids, mask_alpha )
 
 
     def get_input_details(self):
