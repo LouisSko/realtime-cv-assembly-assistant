@@ -71,6 +71,16 @@ necessary_pieces = []
 def index():
     return render_template('index.html')
 
+# Post user settings
+@app.route('/settings', methods=['POST'])
+def set_settings():
+    return jsonify('Success')
+
+# Get user settings
+@app.route('/send-pieces', methods=['GET'])
+def get_settings():
+    return jsonify(necessary_pieces)
+
 # Set mode and first instruction
 @app.route('/start', methods=['POST'])
 def start():
