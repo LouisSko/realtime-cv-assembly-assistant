@@ -74,7 +74,7 @@ def xywh2xyxy(x):
     return y
 
 
-def draw_detections(image, required_class_ids, boxes, scores, class_ids, mask_alpha=0.3):
+def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, mask_alpha=0.3):
 
     mask_img = image.copy()
     det_img = image.copy()
@@ -83,17 +83,11 @@ def draw_detections(image, required_class_ids, boxes, scores, class_ids, mask_al
     size = min([img_height, img_width]) * 0.0006
     text_thickness = int(min([img_height, img_width]) * 0.002)
 
-    # TODO: nur ein schneller fix, damit was angezeigt wird. musst du nochmal ran, Marcel
-    show_labels = False
-    if required_class_ids is None:
-        required_class_ids = class_names
-        show_labels = True
-
     # Draw bounding boxes and labels of detections
     for box, score, class_id in zip(boxes, scores, class_ids):
         class_name = class_names[class_id]
 
-        if class_name in required_class_ids:
+        if class_name in required_class_ids or required_class_ids is None:
             color = colors[class_id]
 
             x1, y1, x2, y2 = box.astype(int)
@@ -104,7 +98,7 @@ def draw_detections(image, required_class_ids, boxes, scores, class_ids, mask_al
             # Draw fill rectangle in mask image
             cv2.rectangle(mask_img, (x1, y1), (x2, y2), (102, 102, 255), -1)
 
-            if show_labels:
+            if required_class_ids is None:
                 label = class_name
                 caption = f'{label} {int(score * 100)}%'
             else:
