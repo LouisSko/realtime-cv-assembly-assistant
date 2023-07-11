@@ -10,14 +10,12 @@
             padding: 20px;
             width: 100%;
         }
-
         /* Image on the left */
         .left-image {
             width: 50px;
             height: 50px;
             /* Add any additional styles for the left image */
         }
-
         /* Title in the center */
         .title {
             text-align: center;
@@ -25,12 +23,10 @@
             font-weight: bold;
             margin-bottom: 20px;
         }
-
         /* Image on the right */
         .right-image {
             width: 100px;
         }
-
         /* CSS styles for the layout */
         body {
             margin: 0;
@@ -92,7 +88,6 @@
             position: relative;
             display: inline-block;
         }
-
         .color-options {
             position: absolute;
             z-index: 1;
@@ -100,9 +95,24 @@
             left: 0;
             display: none;
         }
-
         .color-dropdown.open .color-options {
             display: block;
+        }
+        .settings {
+            display: flex;
+            flex-direction: column;
+            margin: 20px;
+        }
+        .settings-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+        .settings-content div {
+            margin-bottom: 10px;
+        }
+        .settings-buttons {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -138,35 +148,38 @@
                 <a href="/live" class="button go-button">GO</a>
             </div>
             <div class="settings">
-                <h2>Advanced Settings</h2>
                 <div id="advanced-settings" style="display: none;">
                     <!-- Advanced settings content -->
-                    <div>
-                        <label for="coloring">Coloring:</label>
-                        <input type="radio" id="single-color" name="coloring" value="single-color">
-                        <label for="single-color">One Color</label>
-                        <div id="color-dropdown" class="color-dropdown">
-                            <input type="color" id="color-textfield" name="color" disabled>
-                            <div id="color-options" class="color-options"></div>
+                    <div class="settings-content">
+                        <div>
+                            <label for="coloring">Coloring:</label>
+                            <input type="radio" id="single-color" name="coloring" value="single-color">
+                            <label for="single-color">One Color</label>
+                            <input type="radio" id="multi-color" name="coloring" value="multi-color">
+                            <label for="multi-color">Multiple Colors</label>
                         </div>
-                        <input type="radio" id="multi-color" name="coloring" value="multi-color">
-                        <label for="multi-color">Multiple Colors</label>
-                    </div>
-                    <div>
-                        <label for="confidence">Min Confidence:</label>
-                        <input type="text" id="confidence" name="confidence">
-                    </div>
-                    <div>
-                        <input type="checkbox" id="display-confidence" name="display-confidence">
-                        <label for="display-confidence">Display Confidence</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="display-label" name="display-label">
-                        <label for="display-label">Display Label Name</label>
+                        <div>
+                            <label for="confidence">Min Confidence:</label>
+                            <input type="text" id="confidence" name="confidence">
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-confidence" name="display-confidence">
+                            <label for="display-confidence">Display Confidence</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-label" name="display-label">
+                            <label for="display-label">Display Label Name</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-all" name="display-all">
+                            <label for="display-all">Display All Detected Parts</label>
+                        </div>
                     </div>
                 </div>
-                <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
-                <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
+                <div class="settings-buttons">
+                    <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
+                    <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
+                </div>
             </div>
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
@@ -175,23 +188,6 @@
                     const goBtn = document.getElementById('go-btn');
                     const settingsBtn = document.getElementById('settings-btn')
                     const toggleBtn = document.getElementById('toggle-btn');
-                    const singleColorRadio = document.getElementById('single-color');
-                    const colorDropdown = document.getElementById('color-dropdown');
-                    const colorOptions = document.getElementById('color-options');
-
-                    // Possible colors for the dropdown
-                    const possibleColors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
-                    
-                    // Populate color options in the dropdown
-                    possibleColors.forEach(color => {
-                        const option = document.createElement('div');
-                        option.classList.add('color-option');
-                        option.style.backgroundColor = color;
-                        option.addEventListener('click', () => {
-                            document.getElementById('color-textfield').value = color;
-                        });
-                        colorOptions.appendChild(option);
-                    });
 
                     assemblyBtn.addEventListener('click', () => {
                         start('assembly');
@@ -214,13 +210,21 @@
                         const confidence = document.getElementById('confidence').value;
                         const displayConfidence = document.getElementById('display-confidence').checked;
                         const displayLabel = document.getElementById('display-label').checked;
+                        const displayAll = document.getElementById('display-all').checked;
 
-                        setSettings(coloring, confidence, displayConfidence, displayLabel);
+                        setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll);
                     });
 
-                    singleColorRadio.addEventListener('change', () => {
-                        colorDropdown.classList.toggle('open', singleColorRadio.checked);
-                    });
+                    function setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll) {
+                        fetch('/settings', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ coloring, confidence, displayConfidence, displayLabel, displayAll })
+                        })
+                            .then(response => response.json())
+                    }
 
                     function start(mode) {
                         fetch('/start', {
@@ -229,17 +233,6 @@
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ mode: mode })
-                        })
-                            .then(response => response.json())
-                    }
-
-                    function setSettings(coloring, confidence, displayConfidence, displayLabel) {
-                        fetch('/settings', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ coloring, confidence, displayConfidence, displayLabel })
                         })
                             .then(response => response.json())
                     }

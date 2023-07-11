@@ -98,6 +98,22 @@
             width: 100%;
             height: auto;
         }
+        .settings {
+            display: flex;
+            flex-direction: column;
+            margin: 20px;
+        }
+        .settings-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+        .settings-content div {
+            margin-bottom: 10px;
+        }
+        .settings-buttons {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -125,84 +141,153 @@
                     <button id="last-button" class="button last-button">Back</button>
                     <button id="next-button" class="button next-button">Next</button>
                 </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        // Get the instruction image element
-                        const instructionImage = document.getElementById('instruction-image');
-                
-                        // Get all buttons
-                        const nextButton = document.getElementById('next-button');
-                        const lastButton = document.getElementById('last-button');
-                        const checkButton = document.getElementById('check-button');
-
-                        // Get paragraph to display response
-                        const netResponse = document.getElementById('net-response')
-
-                        lastButton.addEventListener('click', () => {
-                            fetch('/previous', { method: 'POST' })
-                                .then(response => response.json())
-                                .then(data => {
-                                    updateUI(data.step, data.pieces);
-                                    sendPieces(data.pieces);
-                                });
-                        });
-
-                        nextButton.addEventListener('click', () => {
-                            fetch('/next', { method: 'POST' })
-                                .then(response => response.json())
-                                .then(data => {
-                                    updateUI(data.step, data.pieces);
-                                    sendPieces(data.pieces);
-                                });
-                        });
-
-                        checkButton.addEventListener('click', () => {
-                            fetch('/detections') // Get the detections
-                                .then(response => response.json())
-                                .then(detections => {
-                                    // Perform checks on the detections
-                                    fetch('/labels', { method: 'POST' })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            updateLabeling(data.message);
-                                        });
-                                });
-                        });
-
-                        function updateUI(step, pieces) {
-                            // Update instruction image
-                            instructionImage.src = `/resources/${step}.jpeg`;
-
-                            // TODO: Update bounding boxes on video feed
-                        }
-
-                        function updateLabeling(response) {
-                            netResponse.textContent = response
-                        }
-
-                        function sendPieces(pieces) {
-                            fetch('/send-pieces', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ pieces: pieces })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data.message);
-                            })
-                            .catch(error => {
-                                console.error('Error sending pieces:', error);
-                            });
-                        }
-                        sendPieces("{{ pieces }}")
-
-                    })
-            
-                </script>
+            </div>
+        </div>
+        <div class="row">
+            <div class="settings">
+                <div id="advanced-settings" style="display: none;">
+                    <!-- Advanced settings content -->
+                    <div class="settings-content">
+                        <div>
+                            <label for="coloring">Coloring:</label>
+                            <input type="radio" id="single-color" name="coloring" value="single-color">
+                            <label for="single-color">One Color</label>
+                            <input type="radio" id="multi-color" name="coloring" value="multi-color">
+                            <label for="multi-color">Multiple Colors</label>
+                        </div>
+                        <div>
+                            <label for="confidence">Min Confidence:</label>
+                            <input type="text" id="confidence" name="confidence">
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-confidence" name="display-confidence">
+                            <label for="display-confidence">Display Confidence</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-label" name="display-label">
+                            <label for="display-label">Display Label Name</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-all" name="display-all">
+                            <label for="display-all">Display All Detected Parts</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-buttons">
+                    <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
+                    <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
+                </div>
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the instruction image element
+            const instructionImage = document.getElementById('instruction-image');
+    
+            // Get all buttons
+            const nextButton = document.getElementById('next-button');
+            const lastButton = document.getElementById('last-button');
+            const checkButton = document.getElementById('check-button');
+
+            // Get paragraph to display response
+            const netResponse = document.getElementById('net-response')
+
+            // Settings
+            const settingsBtn = document.getElementById('settings-btn')
+            const toggleBtn = document.getElementById('toggle-btn');
+
+            lastButton.addEventListener('click', () => {
+                fetch('/previous', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data.step, data.pieces);
+                        sendPieces(data.pieces);
+                    });
+            });
+
+            nextButton.addEventListener('click', () => {
+                fetch('/next', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data.step, data.pieces);
+                        sendPieces(data.pieces);
+                    });
+            });
+
+            checkButton.addEventListener('click', () => {
+                fetch('/detections') // Get the detections
+                    .then(response => response.json())
+                    .then(detections => {
+                        // Perform checks on the detections
+                        fetch('/labels', { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                updateLabeling(data.message);
+                            });
+                    });
+            });
+
+            function updateUI(step, pieces) {
+                // Update instruction image
+                instructionImage.src = `/resources/${step}.jpeg`;
+
+                // TODO: Update bounding boxes on video feed
+            }
+
+            function updateLabeling(response) {
+                netResponse.textContent = response
+            }
+
+            function sendPieces(pieces) {
+                fetch('/send-pieces', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pieces: pieces })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => {
+                    console.error('Error sending pieces:', error);
+                });
+            }
+            sendPieces("{{ pieces }}")
+
+            toggleBtn.addEventListener('click', () => {
+                const advancedSettings = document.getElementById('advanced-settings');
+                const isHidden = advancedSettings.style.display === 'none';
+                advancedSettings.style.display = isHidden ? 'block' : 'none';
+                toggleBtn.textContent = isHidden ? 'Hide Advanced Settings' : 'Show Advanced Settings';
+                settingsBtn.style.display = isHidden ? 'block' : 'none';
+            });
+
+            settingsBtn.addEventListener('click', () => {
+                const coloring = document.querySelector('input[name="coloring"]:checked').value;
+                const confidence = document.getElementById('confidence').value;
+                const displayConfidence = document.getElementById('display-confidence').checked;
+                const displayLabel = document.getElementById('display-label').checked;
+                const displayAll = document.getElementById('display-all').checked;
+
+                setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll);
+            });
+
+            function setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll) {
+                fetch('/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ coloring, confidence, displayConfidence, displayLabel, displayAll })
+                })
+                    .then(response => response.json())
+            }
+
+        })
+
+    </script>
 </body>
 </html>
