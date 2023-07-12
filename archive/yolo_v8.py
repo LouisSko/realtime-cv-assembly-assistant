@@ -1,7 +1,5 @@
 from ultralytics import YOLO
 import cv2
-from overlays import *
-
 
 # load a pretrained model
 model = YOLO("/Users/louis.skowronek/Downloads/test/yolov8n_custom/weights/best.pt")

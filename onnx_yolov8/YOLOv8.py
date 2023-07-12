@@ -141,22 +141,4 @@ class YOLOv8:
         self.output_names = [model_outputs[i].name for i in range(len(model_outputs))]
 
 
-if __name__ == '__main__':
-    from imread_from_url import imread_from_url
 
-    model_path = "../models/yolov8m.onnx"
-
-    # Initialize YOLOv7 object detector
-    yolov7_detector = YOLOv8(model_path, conf_thres=0.3, iou_thres=0.5)
-
-    img_url = "https://live.staticflickr.com/13/19041780_d6fd803de0_3k.jpg"
-    img = imread_from_url(img_url)
-
-    # Detect Objects
-    yolov7_detector(img)
-
-    # Draw detections
-    combined_img = yolov7_detector.draw_detections(img)
-    cv2.namedWindow("Output", cv2.WINDOW_NORMAL)
-    cv2.imshow("Output", combined_img)
-    cv2.waitKey(0)
