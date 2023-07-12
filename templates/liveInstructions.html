@@ -191,7 +191,8 @@
             // Settings
             const settingsBtn = document.getElementById('settings-btn')
             const toggleBtn = document.getElementById('toggle-btn');
-
+            
+            // Add functionality to Previous button
             lastButton.addEventListener('click', () => {
                 fetch('/previous', { method: 'POST' })
                     .then(response => response.json())
@@ -201,6 +202,7 @@
                     });
             });
 
+            // Add functionality to Next button
             nextButton.addEventListener('click', () => {
                 fetch('/next', { method: 'POST' })
                     .then(response => response.json())
@@ -210,6 +212,7 @@
                     });
             });
 
+            // Add functionality to Check button
             checkButton.addEventListener('click', () => {
                 fetch('/detections') // Get the detections
                     .then(response => response.json())
@@ -223,6 +226,7 @@
                     });
             });
 
+            // Update UI by changing instruction image
             function updateUI(step, pieces) {
                 // Update instruction image
                 instructionImage.src = `/resources/${step}.jpeg`;
@@ -234,6 +238,7 @@
                 netResponse.textContent = response
             }
 
+            // Send parts of upcoming instruction step via POST request
             function sendPieces(pieces) {
                 fetch('/send-pieces', {
                     method: 'POST',
@@ -252,6 +257,7 @@
             }
             sendPieces("{{ pieces }}")
 
+            // Add functionality to Advanced Settings button
             toggleBtn.addEventListener('click', () => {
                 const advancedSettings = document.getElementById('advanced-settings');
                 const isHidden = advancedSettings.style.display === 'none';
@@ -260,6 +266,7 @@
                 settingsBtn.style.display = isHidden ? 'block' : 'none';
             });
 
+            // Add functionality to Confrim button
             settingsBtn.addEventListener('click', () => {
                 const coloring = document.querySelector('input[name="coloring"]:checked').value;
                 const confidence = document.getElementById('confidence').value;
@@ -269,7 +276,8 @@
 
                 setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll);
             });
-
+            
+            // Set settings via POST request
             function setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll) {
                 fetch('/settings', {
                     method: 'POST',
