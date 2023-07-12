@@ -120,39 +120,6 @@ def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, 
     return cv2.addWeighted(mask_img, mask_alpha, det_img, 1 - mask_alpha, 0)
 
 
-def draw_comparison(img1, img2, name1, name2, fontsize=2.6, text_thickness=3):
-    (tw, th), _ = cv2.getTextSize(text=name1, fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                                  fontScale=fontsize, thickness=text_thickness)
-    x1 = img1.shape[1] // 3
-    y1 = th
-    offset = th // 5
-    cv2.rectangle(img1, (x1 - offset * 2, y1 + offset),
-                  (x1 + tw + offset * 2, y1 - th - offset), (0, 115, 255), -1)
-    cv2.putText(img1, name1,
-                (x1, y1),
-                cv2.FONT_HERSHEY_DUPLEX, fontsize,
-                (255, 255, 255), text_thickness)
-
-
-    (tw, th), _ = cv2.getTextSize(text=name2, fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                                  fontScale=fontsize, thickness=text_thickness)
-    x1 = img2.shape[1] // 3
-    y1 = th
-    offset = th // 5
-    cv2.rectangle(img2, (x1 - offset * 2, y1 + offset),
-                  (x1 + tw + offset * 2, y1 - th - offset), (94, 23, 235), -1)
-
-    cv2.putText(img2, name2,
-                (x1, y1),
-                cv2.FONT_HERSHEY_DUPLEX, fontsize,
-                (255, 255, 255), text_thickness)
-
-    combined_img = cv2.hconcat([img1, img2])
-    if combined_img.shape[1] > 3840:
-        combined_img = cv2.resize(combined_img, (3840, 2160))
-
-    return combined_img
-
 class MotionDetector:
     def __init__(self, threshold=30, th_diff=0.3, skip_frames=30):
         self.threshold = threshold
@@ -206,3 +173,35 @@ class MotionDetector:
                 self.motion_flag = False
 
         return self.motion_flag
+
+
+
+def gstreamer_pipeline(
+    sensor_id=0,
+    capture_width=3246,
+    capture_height=1848,
+    # capture_width=1280,
+    # capture_height=720,
+    display_width=1280,
+    display_height=720,
+    framerate=21,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc sensor-id=%d ! "
+        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink"
+        % (
+            sensor_id,
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
+

@@ -3,9 +3,11 @@ from flask import Flask, jsonify, render_template, Response, request
 import requests
 
 from onnx_yolov8.YOLOv8 import YOLOv8
-from onnx_yolov8.utils import MotionDetector
+from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline
+
 
 app = Flask(__name__, static_folder='resources')
+
 
 LABELS = {
     0: "grey1",
@@ -46,16 +48,19 @@ STEPS = {
     15: ["wire"]
 }
 
+
+# Define whether to use gstreamer pipeline or video
+cap = cv2.VideoCapture('videos/IMG_4594.MOV')
+#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+
+
 # Initialize YOLOv8 model
 model_path = 'models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
-# Initialize video
-cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-
 cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
 
-# th_diff=1 basically diables the detection
+# th_diff=1 basically disables the detection
 motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
 def capture_camera():
@@ -69,9 +74,21 @@ def capture_camera():
             # Read frame from the video
             ret, frame = cap.read()
             if not ret:
-                break
+                continue
+
+            # check whether there is motion in the image
+            motion = motion_detector.detect_motion(frame)
+            motion = False
+            # Update object localizer if there is no motion in the image
+            if not motion:
+                boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
+                frame = yolov8_detector.draw_detections(frame, required_class_ids=["red1", "grey5", "engine"])
+
+
             ret, buffer = cv2.imencode('.jpg', frame)
+            print(type(buffer))
             frame = buffer.tobytes()
+            print(type(frame))
 
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
@@ -89,18 +106,11 @@ def capture_camera():
         else:
             print('Error:', response.status_code)
 
-        # check whether there is motion in the image
-        '''motion = motion_detector.detect_motion(frame)
 
-        # Update object localizer if there is no motion in the image
-        if not motion:
-            boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
-
-            frame = yolov8_detector.draw_detections(frame)
 
             # Create a list to store the detection results
             detection_results = []
-
+            '''
             # Format the detection results
             if len(boxes)>0:
                 for i in range(0,len(boxes)):
@@ -121,29 +131,12 @@ def capture_camera():
                 else:
                     print("Error sending detection results")
 
-        yolov8_detector.motion_prev = motion'''
+        yolov8_detector.motion_prev = motion
+        '''
 
         #cv2.imshow("Detected Objects", frame)
 
-# Function to capture the camera feed
-'''
-def capture_camera():
-    camera = cv2.VideoCapture(0)  # Use the appropriate camera index if necessary
 
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-
-        # Convert the frame to JPEG format
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-    camera.release()
-'''
     
 current_mode = 'assembly'  # Default mode
 current_step = 1  # Default step for assembly mode
@@ -216,7 +209,7 @@ def send_pieces():
     # Return a response to indicate successful processing
     return jsonify({'message': 'Necessary pieces sent successfully'})
 
-# GET all necssary pices of current instruction stepp
+# GET all necssary pices of current instruction step
 @app.route('/send-pieces', methods=['GET'])
 def get_pieces():
     return jsonify(necessary_pieces)
