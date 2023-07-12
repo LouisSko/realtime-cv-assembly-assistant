@@ -103,11 +103,6 @@
             flex-direction: column;
             margin: 20px;
         }
-        .settings-content {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: 10px;
-        }
         .settings-content div {
             margin-bottom: 10px;
         }
@@ -173,7 +168,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="settings-buttons">
+                <div class="row buttons">
                     <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
                     <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
                 </div>
@@ -261,7 +256,7 @@
                 const advancedSettings = document.getElementById('advanced-settings');
                 const isHidden = advancedSettings.style.display === 'none';
                 advancedSettings.style.display = isHidden ? 'block' : 'none';
-                toggleBtn.textContent = isHidden ? 'Hide Advanced Settings' : 'Show Advanced Settings';
+                toggleBtn.textContent = isHidden ? 'Hide' : 'Advanced Settings';
                 settingsBtn.style.display = isHidden ? 'block' : 'none';
             });
 
