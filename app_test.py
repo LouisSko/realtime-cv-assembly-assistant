@@ -66,6 +66,21 @@ motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 def capture_camera():
     while cap.isOpened():
 
+        settings_url = 'http://127.0.0.1:5000/settings'
+        response_settings = requests.get(settings_url)
+        if response_settings.status_code == 200:
+            settings_resp = response_settings.json()
+            coloring = settings_resp['coloring']
+            confidence = settings_resp['confidence']
+            displayConfidence = settings_resp['displayConfidence']
+            displayLabel = settings_resp['displayLabel']
+            displayAll = settings_resp['displayAll']
+
+            yolov8_detector.set_settings(coloring, confidence, displayAll, displayConfidence, displayLabel)
+
+        else:
+            print('Error:', response_settings.status_code)
+
         # Press key q to stop
         #if cv2.waitKey(1) == ord('q'):
             #break
@@ -96,43 +111,40 @@ def capture_camera():
             print(e)
             continue
 
-        #TODO: Add functionality to only show overlays of sent pieces and then only post these
         pieces_url = 'http://127.0.0.1:5000/send-pieces'
         response = requests.get(pieces_url)
         if response.status_code == 200:
             pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
-
             print(pieces)
         else:
             print('Error:', response.status_code)
-
-
-
-            # Create a list to store the detection results
-            detection_results = []
-            '''
-            # Format the detection results
-            if len(boxes)>0:
-                for i in range(0,len(boxes)):
-                    result = {
-                        'label': str(class_ids[i]),
-                        'confidence': str(scores[i]),
-                        'boxes': str(boxes[i])
-                    }
-                    detection_results.append(result)
-
-                url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
-                headers = {'Content-Type': 'application/json'}
-                response = requests.post(url, json=detection_results, headers=headers)
-
-                # Check the response status code
-                if response.status_code == 200:
-                    print("Detection results sent successfully")
-                else:
-                    print("Error sending detection results")
-
-        yolov8_detector.motion_prev = motion
+        
+    
+        # Create a list to store the detection results
+        detection_results = []
         '''
+        # Format the detection results
+        if len(boxes)>0:
+            for i in range(0,len(boxes)):
+                result = {
+                    'label': str(class_ids[i]),
+                    'confidence': str(scores[i]),
+                    'boxes': str(boxes[i])
+                }
+                detection_results.append(result)
+
+            url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(url, json=detection_results, headers=headers)
+
+            # Check the response status code
+            if response.status_code == 200:
+                print("Detection results sent successfully")
+            else:
+                print("Error sending detection results")
+
+    yolov8_detector.motion_prev = motion
+    '''
 
         #cv2.imshow("Detected Objects", frame)
 

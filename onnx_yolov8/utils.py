@@ -74,43 +74,57 @@ def xywh2xyxy(x):
     return y
 
 
-def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, mask_alpha=0.3):
+def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, mask_alpha=0.3, multi_color = False, displayAll = False, displayConfidence = False, displayLabel = False):
 
     mask_img = image.copy()
     det_img = image.copy()
 
     img_height, img_width = image.shape[:2]
-    size = min([img_height, img_width]) * 0.0006
-    text_thickness = int(min([img_height, img_width]) * 0.002)
+    size = min([img_height, img_width]) * 0.0005
+    text_thickness = int(min([img_height, img_width]) * 0.001)
 
     # Draw bounding boxes and labels of detections
     for box, score, class_id in zip(boxes, scores, class_ids):
-        class_name = class_names[class_id]
+        label = class_names[class_id]
 
-        if class_name in required_class_ids or required_class_ids is None:
-            color = colors[class_id]
-
+        # Check if every part is displayed or only required ones
+        if (required_class_ids is not None and label in required_class_ids) or (required_class_ids is None) or (displayAll is True):
             x1, y1, x2, y2 = box.astype(int)
 
-            # Draw rectangle
-            cv2.rectangle(det_img, (x1, y1), (x2, y2), (102, 102, 255), 2)
-
-            # Draw fill rectangle in mask image
-            cv2.rectangle(mask_img, (x1, y1), (x2, y2), (102, 102, 255), -1)
-
-            if required_class_ids is None:
-                label = class_name
+            # Settings
+            if multi_color == False:
+                # Set color
+                color = (102, 102, 255)
+                # Draw rectangle
+                cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
+                # Draw fill rectangle in mask image
+                cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
+            else:
+                # Set color
+                color = colors[class_id]
+                # Draw rectangle
+                cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
+                # Draw fill rectangle in mask image
+                cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
+            
+            # Labels based on settings
+            if displayConfidence == True and displayLabel == True:
                 caption = f'{label} {int(score * 100)}%'
+            elif  displayLabel == True and displayConfidence == False:
+                caption = f'{label}'
+            elif displayConfidence == True and displayLabel == False:
+                caption = f'Required piece: {int(score * 100)}%'
             else:
                 caption = "Required piece"
+
             (tw, th), _ = cv2.getTextSize(text=caption, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                                         fontScale=size, thickness=text_thickness)
             th = int(th * 1.2)
 
             cv2.rectangle(det_img, (x1, y1),
-                        (x1 + tw, y1 - th), (0, 0, 255), -1)
+                        (x1 + tw, y1 - th), color, -1)
             cv2.rectangle(mask_img, (x1, y1),
-                        (x1 + tw, y1 - th), (0, 0, 255), -1)
+                        (x1 + tw, y1 - th), color, -1)
             cv2.putText(det_img, caption, (x1, y1),
                         cv2.FONT_HERSHEY_SIMPLEX, size, (255, 255, 255), text_thickness, cv2.LINE_AA)
 
