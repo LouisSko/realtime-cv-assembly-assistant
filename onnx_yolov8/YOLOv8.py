@@ -24,6 +24,12 @@ class YOLOv8:
         self.iou_threshold = iou_thres
         self.motion_prev = True
 
+        #Settings
+        self.multi_color = False
+        self.displayAll = False
+        self.displayConfidence = False
+        self.displayLabel = True
+
         # Initialize model
         self.initialize_model(path)
 
@@ -122,10 +128,30 @@ class YOLOv8:
         boxes *= np.array([self.img_width, self.img_height, self.img_width, self.img_height])
         return boxes
 
+    def set_settings(self, coloring, confidence, displayAll, displayConfidence, displayLabel):
 
-    def draw_detections(self, image, required_class_ids, draw_scores=True, mask_alpha=0.2):
+        # Settings for displayed labels
+        if confidence != "":
+            # Convert to '%' if higher than 1
+            if float(confidence) > 1:
+                self.conf_threshold = float(confidence)/100
+            elif float(confidence) < 0.2:
+                self.conf_threshold = 0.2
+            else:
+                self.conf_threshold = float(confidence)
 
-        return draw_detections(image, self.boxes, self.scores, self.class_ids, required_class_ids, mask_alpha )
+        if coloring == "multi-color":
+            self.multi_color = True
+        if coloring == "single-color":
+            self.multi_color = False
+    
+        self.displayAll = displayAll
+        self.displayConfidence = displayConfidence
+        self.displayLabel = displayLabel
+
+    def draw_detections(self, image, required_class_ids = None, draw_scores=True, mask_alpha=0.2):
+
+        return draw_detections(image, self.boxes, self.scores, self.class_ids, required_class_ids, mask_alpha, self.multi_color, self.displayAll, self.displayConfidence, self.displayLabel)
 
 
     def get_input_details(self):
