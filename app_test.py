@@ -50,8 +50,8 @@ STEPS = {
 
 
 # Define whether to use gstreamer pipeline or video
-cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+#cap = cv2.VideoCapture('videos/IMG_4594.MOV')
+cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
 
 # Initialize YOLOv8 model
@@ -99,11 +99,8 @@ def capture_camera():
                 boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
                 frame = yolov8_detector.draw_detections(frame, required_class_ids=["red1", "grey5", "engine"])
 
-
             ret, buffer = cv2.imencode('.jpg', frame)
-            print(type(buffer))
             frame = buffer.tobytes()
-            print(type(frame))
 
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
