@@ -151,12 +151,15 @@ def index():
 # Post user settings
 @app.route('/settings', methods=['POST'])
 def set_settings():
+    global settings
+    settings = request.get_json()
+    print(settings)
     return jsonify('Success')
 
 # Get user settings
-@app.route('/send-pieces', methods=['GET'])
+@app.route('/settings', methods=['GET'])
 def get_settings():
-    return jsonify(necessary_pieces)
+    return jsonify(settings)
 
 # Set mode and first instruction
 @app.route('/start', methods=['POST'])
