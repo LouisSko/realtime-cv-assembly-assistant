@@ -128,8 +128,8 @@
                     <img class= "image instructionImg" id="instruction-image" src="{{ url_for('static', filename='1.jpeg') }}" alt="Instruction Image">
                 </div>
                 <div class="row buttons">
-                    <button id="next-button" class="button next-button">Back</button>
-                    <button id="last-button" class="button last-button">Next</button>
+                    <button id="last-button" class="button last-button">Back</button>
+                    <button id="next-button" class="button next-button">Next</button>
                 </div>
                 <div class="row">
                     <p id="net-response"></p>
@@ -146,14 +146,14 @@
                     <div class="settings-content">
                         <div>
                             <label for="coloring">Coloring:</label>
-                            <input type="radio" id="single-color" name="coloring" value="single-color">
+                            <input type="radio" id="single-color" name="coloring" value="single-color" checked="checked">
                             <label for="single-color">One Color</label>
                             <input type="radio" id="multi-color" name="coloring" value="multi-color">
                             <label for="multi-color">Multiple Colors</label>
                         </div>
                         <div>
                             <label for="confidence">Min Confidence:</label>
-                            <input type="text" id="confidence" name="confidence">
+                            <input type="text" id="confidence" name="confidence" value="50">
                         </div>
                         <div>
                             <input type="checkbox" id="display-confidence" name="display-confidence">

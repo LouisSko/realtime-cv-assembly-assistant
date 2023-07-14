@@ -179,7 +179,7 @@ def start():
 def live():
     global current_step
     instruction_image = 'resources/{}.jpeg'.format(current_step)
-    return render_template('test.html', 
+    return render_template('liveVideoInstruction.html', 
                            instruction_image=instruction_image, 
                            step=current_step, pieces=STEPS[current_step])
 
