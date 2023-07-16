@@ -198,6 +198,7 @@
                     .then(response => response.json())
                     .then(data => {
                         updateUI(data.step, data.pieces);
+                        updateLabeling("");
                         sendPieces(data.pieces);
                     });
             });
@@ -208,6 +209,7 @@
                     .then(response => response.json())
                     .then(data => {
                         updateUI(data.step, data.pieces);
+                        updateLabeling("");
                         sendPieces(data.pieces);
                     });
             });
