@@ -30,6 +30,24 @@ LABELS = {
     17: "wire"
 }
 
+STEPS_NO = {
+    1: [8, 4, 15],
+    2: [3],
+    3: [0, 10],
+    4: [10, 10, 13],
+    5: [11, 11, 12],
+    6: [1],
+    7: [6],
+    8: [7, 7],
+    9: [16],
+    10: [14],
+    11: [2],
+    12: [9, 9],
+    13: [11, 11, 5, 7],
+    14: [11, 11, 5, 7],
+    15: [17]
+}
+
 STEPS = {
     1: ["red1", "grey5", "engine"],
     2: ["grey4"],
@@ -50,8 +68,8 @@ STEPS = {
 
 
 # Define whether to use gstreamer pipeline or video
-#cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+cap = cv2.VideoCapture('videos/IMG_4594.MOV')
+#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
 
 # Initialize YOLOv8 model
@@ -119,16 +137,16 @@ def capture_camera():
     
         # Create a list to store the detection results
         detection_results = []
-        '''
         # Format the detection results
         if len(boxes)>0:
             for i in range(0,len(boxes)):
-                result = {
-                    'label': str(class_ids[i]),
-                    'confidence': str(scores[i]),
-                    'boxes': str(boxes[i])
-                }
-                detection_results.append(result)
+                if str(class_ids[i]) in pieces:
+                    result = {
+                        'label': str(class_ids[i]),
+                        'confidence': str(scores[i]),
+                        'boxes': str(boxes[i])
+                    }
+                    detection_results.append(result)
 
             url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
             headers = {'Content-Type': 'application/json'}
@@ -141,7 +159,6 @@ def capture_camera():
                 print("Error sending detection results")
 
     yolov8_detector.motion_prev = motion
-    '''
 
         #cv2.imshow("Detected Objects", frame)
 
@@ -181,7 +198,7 @@ def start():
     elif current_mode == 'disassembly':
         current_step = 15
 
-    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
 
 # Load live instructions
 @app.route('/live')
@@ -190,7 +207,7 @@ def live():
     instruction_image = 'resources/{}.jpeg'.format(current_step)
     return render_template('liveVideoInstruction.html', 
                            instruction_image=instruction_image, 
-                           step=current_step, pieces=STEPS[current_step])
+                           step=current_step, pieces=STEPS_NO[current_step])
 
 # Go to next instruction step
 @app.route('/next', methods=['POST'])
@@ -204,7 +221,7 @@ def next_step():
     if current_step > 15:
         current_step = 15
 
-    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
 
 # Go to previous instruction step
 @app.route('/previous', methods=['POST'])
@@ -218,7 +235,7 @@ def previous_step():
     if current_step < 1:
         current_step = 1
 
-    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
 
 # POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
