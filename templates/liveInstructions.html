@@ -127,6 +127,42 @@
                 <div class="row">
                     <button id="check-button" class="button check-button">Check Labels</button>
                 </div>
+                <div class="row">
+                    <div class="settings">
+                        <div id="advanced-settings" style="display: none;">
+                            <!-- Advanced settings content -->
+                            <div class="settings-content">
+                                <div>
+                                    <label for="coloring">Coloring:</label>
+                                    <input type="radio" id="single-color" name="coloring" value="single-color">
+                                    <label for="single-color">One Color</label>
+                                    <input type="radio" id="multi-color" name="coloring" value="multi-color">
+                                    <label for="multi-color">Multiple Colors</label>
+                                </div>
+                                <div>
+                                    <label for="confidence">Min Confidence:</label>
+                                    <input type="text" id="confidence" name="confidence">
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="display-confidence" name="display-confidence">
+                                    <label for="display-confidence">Display Confidence</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="display-label" name="display-label">
+                                    <label for="display-label">Display Label Name</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="display-all" name="display-all">
+                                    <label for="display-all">Display All Detected Parts</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row buttons">
+                            <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
+                            <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="right-column">
                 <div class="row">
@@ -135,42 +171,6 @@
                 <div class="row buttons">
                     <button id="last-button" class="button last-button">Back</button>
                     <button id="next-button" class="button next-button">Next</button>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="settings">
-                <div id="advanced-settings" style="display: none;">
-                    <!-- Advanced settings content -->
-                    <div class="settings-content">
-                        <div>
-                            <label for="coloring">Coloring:</label>
-                            <input type="radio" id="single-color" name="coloring" value="single-color" checked="checked">
-                            <label for="single-color">One Color</label>
-                            <input type="radio" id="multi-color" name="coloring" value="multi-color">
-                            <label for="multi-color">Multiple Colors</label>
-                        </div>
-                        <div>
-                            <label for="confidence">Min Confidence:</label>
-                            <input type="text" id="confidence" name="confidence">
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-confidence" name="display-confidence">
-                            <label for="display-confidence">Display Confidence</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-label" name="display-label">
-                            <label for="display-label">Display Label Name</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-all" name="display-all">
-                            <label for="display-all">Display All Detected Parts</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row buttons">
-                    <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
-                    <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
                 </div>
             </div>
         </div>
