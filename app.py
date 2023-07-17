@@ -5,42 +5,60 @@ import requests
 app = Flask(__name__, static_folder='resources')
 
 LABELS = {
-    0: "grey1",
-    1: "grey2",
-    2: "grey3",
-    3: "grey4",
-    4: "grey5",
-    5: "black1",
-    6: "black2",
-    7: "black3",
-    8: "red1",
-    9: "red2",
-    10: "blue1",
-    11: "blue2",
-    12: "white1",
-    13: "white2",
-    14: "white3",
+    0: "grey_beam_bent",
+    1: "grey_axle_long_stop",
+    2: "grey_axle_short_stop",
+    3: "grey_axle_short",
+    4: "grey_axle_long",
+    5: "black_axle_pin_con",
+    6: "black_beam",
+    7: "black_pin_short",
+    8: "red_oct_con",
+    9: "red_pin_3L",
+    10: "blue_pin_3L",
+    11: "blue_axle_pin",
+    12: "white_beam_bent",
+    13: "white_beam_L",
+    14: "white_tooth",
     15: "engine",
     16: "wheel",
     17: "wire"
 }
 
+STEPS_NO = {
+    1: [8, 4, 15],
+    2: [3],
+    3: [0, 10],
+    4: [10, 10, 13],
+    5: [11, 11, 12],
+    6: [1],
+    7: [6],
+    8: [7, 7],
+    9: [16],
+    10: [14],
+    11: [2],
+    12: [9, 9],
+    13: [11, 11, 5, 7],
+    14: [11, 11, 5, 7],
+    15: [17]
+}
+
 STEPS = {
-    1: ["red1", "grey5", "engine"],
-    2: ["grey4"],
-    3: ["grey1", "blue1"],
-    4: ["blue1", "blue1", "white2"],
-    5: ["blue2", "blue2", "white1"],
-    6: ["grey2"],
-    7: ["black2"],
-    8: ["black3", "black3"],
-    9: ["wheel"],
-    10: ["white3"],
-    11: ["grey3"],
-    12: ["red2", "red2"],
-    13: ["blue2", "blue2", "black1", "black3"],
-    14: ["blue2", "blue2", "black1", "black3"],
-    15: ["wire"]
+    1: [LABELS[8], LABELS[4], LABELS[15]],             # [red_oct_con, grey_axle_long, engine]
+    2: [LABELS[3]],                                   # [grey_axle_short]
+    3: [LABELS[0], LABELS[10]],                       # [grey_beam_bent, blue_pin_3L]
+    4: [LABELS[10], LABELS[10], LABELS[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
+    5: [LABELS[11], LABELS[11], LABELS[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
+    6: [LABELS[1]],                                   # [grey_axle_long_stop]
+    7: [LABELS[6]],                                   # [black_beam]
+    8: [LABELS[7], LABELS[7]],                        # [black_pin_short, black_pin_short]
+    9: [LABELS[16]],                                  # [wheel]
+    10: [LABELS[14]],                                 # [white_tooth]
+    11: [LABELS[2]],                                  # [grey_axle_short_stop]
+    12: [LABELS[9], LABELS[9]],                       # [red_pin_3L, red_pin_3L]
+    13: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    14: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    15: [LABELS[17]]                                  # [wire]
 }
 
 # Function to capture the camera feed
@@ -65,6 +83,7 @@ current_mode = 'assembly'  # Default mode
 current_step = 1  # Default step for assembly mode
 detection_results = []
 necessary_pieces = []
+
 
 # Load Homepage
 @app.route('/')
@@ -102,7 +121,7 @@ def start():
 def live():
     global current_step
     instruction_image = 'resources/{}.jpeg'.format(current_step)
-    return render_template('liveInstructions.html', 
+    return render_template('liveVideoInstruction.html', 
                            instruction_image=instruction_image, 
                            step=current_step, pieces=STEPS[current_step])
 
@@ -118,7 +137,7 @@ def next_step():
     if current_step > 15:
         current_step = 15
 
-    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 # Go to previous instruction step
 @app.route('/previous', methods=['POST'])
@@ -132,7 +151,7 @@ def previous_step():
     if current_step < 1:
         current_step = 1
 
-    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
+    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 # POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
@@ -177,25 +196,25 @@ def get_detections():
 def handle_labels():
     global current_step, current_mode, detection_results
 
-    print(detection_results)
-    missing_labels = []
+    labels = []
 
-    for label in STEPS[current_step]:
-            if label not in detection_results:
-                missing_labels.append(label)
+    for detection in detection_results:
+        labels.append(int(detection['label']))
+
+    print(labels)
 
     if current_mode == 'assembly':
 
-        if len(missing_labels)>0:
-            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.', 'missing': missing_labels})
+        if STEPS_NO[current_step].sort() != labels.sort():
+            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.', 'missing': missing_labels})
+            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
         
     else:
-        if len(missing_labels)>0:
-            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.', 'missing': missing_labels})
+        if STEPS_NO[current_step].sort() != labels.sort():
+            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.', 'missing': missing_labels})
+            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.'})
         
 
 if __name__ == '__main__':
