@@ -26,7 +26,7 @@ LABELS = {
 }
 
 STEPS_NO = {
-    1: [8, 4, 15],
+    1: [4, 8, 15],
     2: [3],
     3: [0, 10],
     4: [10, 10, 13],
@@ -38,8 +38,8 @@ STEPS_NO = {
     10: [14],
     11: [2],
     12: [9, 9],
-    13: [11, 11, 5, 7],
-    14: [11, 11, 5, 7],
+    13: [5, 7, 11, 11],
+    14: [5, 7, 11, 11],
     15: [17]
 }
 
@@ -198,24 +198,29 @@ def handle_labels():
 
     labels = []
 
+    # Get all relevant detections
     for detection in detection_results:
-        labels.append(int(detection['label']))
+        if int(detection['label']) in STEPS_NO[current_step]:
+            labels.append(int(detection['label']))
 
-    print(labels)
+    # Check if all necessary parts were detected
+    for part in STEPS_NO[current_step]:
+        if part not in labels:
+            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
 
-    if current_mode == 'assembly':
+    if current_mode == "Disassembly":
 
-        if STEPS_NO[current_step].sort() != labels.sort():
+        # Check if not enough parts were detected in case of two of same kind are needed
+        if len(labels) < len(STEPS_NO[current_step]):
             return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
         else:
             return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
         
     else:
-        if STEPS_NO[current_step].sort() != labels.sort():
+        if len(labels) < len(STEPS_NO[current_step]):
             return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.'})
         else:
             return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.'})
-        
-
+       
 if __name__ == '__main__':
     app.run()
