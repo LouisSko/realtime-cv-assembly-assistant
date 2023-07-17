@@ -208,19 +208,19 @@ def handle_labels():
         if part not in labels:
             return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
 
-    if current_mode == "Disassembly":
+    if current_mode == "Assembly":
 
         # Check if not enough parts were detected in case of two of same kind are needed
         if len(labels) < len(STEPS_NO[current_step]):
             return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
+            return jsonify({'message': 'All necessary pieces were found. Grab the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
         
     else:
         if len(labels) < len(STEPS_NO[current_step]):
             return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.'})
         else:
             return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.'})
-       
+               
 if __name__ == '__main__':
     app.run()
