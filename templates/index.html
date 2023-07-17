@@ -142,47 +142,11 @@
                 <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
                 <a href="/live" class="button go-button">GO</a>
             </div>
-            <div class="settings">
-                <div id="advanced-settings" style="display: none;">
-                    <!-- Advanced settings content -->
-                    <div class="settings-content">
-                        <div>
-                            <label for="coloring">Coloring:</label>
-                            <input type="radio" id="single-color" name="coloring" value="single-color" checked="checked">
-                            <label for="single-color">One Color</label>
-                            <input type="radio" id="multi-color" name="coloring" value="multi-color">
-                            <label for="multi-color">Multiple Colors</label>
-                        </div>
-                        <div>
-                            <label for="confidence">Min Confidence:</label>
-                            <input type="text" id="confidence" name="confidence" value="50">
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-confidence" name="display-confidence">
-                            <label for="display-confidence">Display Confidence</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-label" name="display-label">
-                            <label for="display-label">Display Label Name</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="display-all" name="display-all">
-                            <label for="display-all">Display All Detected Parts</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row buttons">
-                    <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
-                    <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
-                </div>
-            </div>
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const assemblyBtn = document.getElementById('assembly-btn');
                     const disassemblyBtn = document.getElementById('disassembly-btn');
                     const goBtn = document.getElementById('go-btn');
-                    const settingsBtn = document.getElementById('settings-btn')
-                    const toggleBtn = document.getElementById('toggle-btn');
                     
                     // Add functionality to Assembly button
                     assemblyBtn.addEventListener('click', () => {
@@ -193,38 +157,6 @@
                     disassemblyBtn.addEventListener('click', () => {
                         start('disassembly');
                     });
-
-                    // Add functionality to Advanced Settings button
-                    toggleBtn.addEventListener('click', () => {
-                        const advancedSettings = document.getElementById('advanced-settings');
-                        const isHidden = advancedSettings.style.display === 'none';
-                        advancedSettings.style.display = isHidden ? 'block' : 'none';
-                        toggleBtn.textContent = isHidden ? 'Hide' : 'Advanced Settings';
-                        settingsBtn.style.display = isHidden ? 'block' : 'none';
-                    });
-
-                    // Add functionality to Confirm button
-                    settingsBtn.addEventListener('click', () => {
-                        const coloring = document.querySelector('input[name="coloring"]:checked').value;
-                        const confidence = document.getElementById('confidence').value;
-                        const displayConfidence = document.getElementById('display-confidence').checked;
-                        const displayLabel = document.getElementById('display-label').checked;
-                        const displayAll = document.getElementById('display-all').checked;
-
-                        setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll);
-                    });
-
-                    // Set settings via POST request
-                    function setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll) {
-                        fetch('/settings', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ coloring, confidence, displayConfidence, displayLabel, displayAll })
-                        })
-                            .then(response => response.json())
-                    }
                     
                     // Start live instruction via POST request
                     function start(mode) {
@@ -237,9 +169,6 @@
                         })
                             .then(response => response.json())
                     }
-
-                    // Set setting on initial page load
-                    setSettings("single-color", "50", "", "", "")
                 })
             </script>
         </div>
