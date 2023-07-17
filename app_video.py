@@ -10,21 +10,21 @@ app = Flask(__name__, static_folder='resources')
 
 
 LABELS = {
-    0: "grey1",
-    1: "grey2",
-    2: "grey3",
-    3: "grey4",
-    4: "grey5",
-    5: "black1",
-    6: "black2",
-    7: "black3",
-    8: "red1",
-    9: "red2",
-    10: "blue1",
-    11: "blue2",
-    12: "white1",
-    13: "white2",
-    14: "white3",
+    0: "grey_beam_bent",
+    1: "grey_axle_long_stop",
+    2: "grey_axle_short_stop",
+    3: "grey_axle_short",
+    4: "grey_axle_long",
+    5: "black_axle_pin_con",
+    6: "black_beam",
+    7: "black_pin_short",
+    8: "red_oct_con",
+    9: "red_pin_3L",
+    10: "blue_pin_3L",
+    11: "blue_axle_pin",
+    12: "white_beam_bent",
+    13: "white_beam_L",
+    14: "white_tooth",
     15: "engine",
     16: "wheel",
     17: "wire"
@@ -49,21 +49,21 @@ STEPS_NO = {
 }
 
 STEPS = {
-    1: ["red1", "grey5", "engine"],
-    2: ["grey4"],
-    3: ["grey1", "blue1"],
-    4: ["blue1", "blue1", "white2"],
-    5: ["blue2", "blue2", "white1"],
-    6: ["grey2"],
-    7: ["black2"],
-    8: ["black3", "black3"],
-    9: ["wheel"],
-    10: ["white3"],
-    11: ["grey3"],
-    12: ["red2", "red2"],
-    13: ["blue2", "blue2", "black1", "black3"],
-    14: ["blue2", "blue2", "black1", "black3"],
-    15: ["wire"]
+    1: [LABELS[8], LABELS[4], LABELS[15]],             # [red_oct_con, grey_axle_long, engine]
+    2: [LABELS[3]],                                   # [grey_axle_short]
+    3: [LABELS[0], LABELS[10]],                       # [grey_beam_bent, blue_pin_3L]
+    4: [LABELS[10], LABELS[10], LABELS[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
+    5: [LABELS[11], LABELS[11], LABELS[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
+    6: [LABELS[1]],                                   # [grey_axle_long_stop]
+    7: [LABELS[6]],                                   # [black_beam]
+    8: [LABELS[7], LABELS[7]],                        # [black_pin_short, black_pin_short]
+    9: [LABELS[16]],                                  # [wheel]
+    10: [LABELS[14]],                                 # [white_tooth]
+    11: [LABELS[2]],                                  # [grey_axle_short_stop]
+    12: [LABELS[9], LABELS[9]],                       # [red_pin_3L, red_pin_3L]
+    13: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    14: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    15: [LABELS[17]]                                  # [wire]
 }
 
 
@@ -103,6 +103,14 @@ def capture_camera():
         #if cv2.waitKey(1) == ord('q'):
             #break
 
+        pieces_url = 'http://127.0.0.1:5000/send-pieces'
+        response = requests.get(pieces_url)
+        if response.status_code == 200:
+            pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
+            print(pieces)
+        else:
+            print('Error:', response.status_code)
+
         try:
             # Read frame from the video
             ret, frame = cap.read()
@@ -115,7 +123,7 @@ def capture_camera():
             # Update object localizer if there is no motion in the image
             if not motion:
                 boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
-                frame = yolov8_detector.draw_detections(frame, required_class_ids=["red1", "grey5", "engine"])
+                frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
 
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
@@ -125,14 +133,6 @@ def capture_camera():
         except Exception as e:
             print(e)
             continue
-
-        pieces_url = 'http://127.0.0.1:5000/send-pieces'
-        response = requests.get(pieces_url)
-        if response.status_code == 200:
-            pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
-            print(pieces)
-        else:
-            print('Error:', response.status_code)
         
     
         # Create a list to store the detection results
@@ -140,13 +140,12 @@ def capture_camera():
         # Format the detection results
         if len(boxes)>0:
             for i in range(0,len(boxes)):
-                if str(class_ids[i]) in pieces:
-                    result = {
-                        'label': str(class_ids[i]),
-                        'confidence': str(scores[i]),
-                        'boxes': str(boxes[i])
-                    }
-                    detection_results.append(result)
+                result = {
+                    'label': str(class_ids[i]),
+                    'confidence': str(scores[i]),
+                    'boxes': str(boxes[i])
+                }
+                detection_results.append(result)
 
             url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
             headers = {'Content-Type': 'application/json'}
@@ -160,7 +159,7 @@ def capture_camera():
 
     yolov8_detector.motion_prev = motion
 
-        #cv2.imshow("Detected Objects", frame)
+    #cv2.imshow("Detected Objects", frame)
 
 
     
@@ -168,6 +167,7 @@ current_mode = 'assembly'  # Default mode
 current_step = 1  # Default step for assembly mode
 detection_results = []
 necessary_pieces = []
+
 
 # Load Homepage
 @app.route('/')
@@ -198,7 +198,7 @@ def start():
     elif current_mode == 'disassembly':
         current_step = 15
 
-    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
 # Load live instructions
 @app.route('/live')
@@ -207,7 +207,7 @@ def live():
     instruction_image = 'resources/{}.jpeg'.format(current_step)
     return render_template('liveVideoInstruction.html', 
                            instruction_image=instruction_image, 
-                           step=current_step, pieces=STEPS_NO[current_step])
+                           step=current_step, pieces=STEPS[current_step])
 
 # Go to next instruction step
 @app.route('/next', methods=['POST'])
@@ -221,7 +221,7 @@ def next_step():
     if current_step > 15:
         current_step = 15
 
-    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
+    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 # Go to previous instruction step
 @app.route('/previous', methods=['POST'])
@@ -235,7 +235,7 @@ def previous_step():
     if current_step < 1:
         current_step = 1
 
-    return jsonify({'step': current_step, 'pieces': STEPS_NO[current_step]})
+    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 # POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
@@ -280,25 +280,25 @@ def get_detections():
 def handle_labels():
     global current_step, current_mode, detection_results
 
-    print(detection_results)
-    missing_labels = []
+    labels = []
 
-    for label in STEPS[current_step]:
-            if label not in detection_results:
-                missing_labels.append(label)
+    for detection in detection_results:
+        labels.append(int(detection['label']))
+
+    print(labels)
 
     if current_mode == 'assembly':
 
-        if len(missing_labels)>0:
-            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.', 'missing': missing_labels})
+        if STEPS_NO[current_step].sort() != labels.sort():
+            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.', 'missing': missing_labels})
+            return jsonify({'message': 'All necessary pieces were found. Select the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
         
     else:
-        if len(missing_labels)>0:
-            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.', 'missing': missing_labels})
+        if STEPS_NO[current_step].sort() != labels.sort():
+            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.', 'missing': missing_labels})
+            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.'})
         
 
 if __name__ == '__main__':
