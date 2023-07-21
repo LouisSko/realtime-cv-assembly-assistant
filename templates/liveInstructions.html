@@ -122,10 +122,12 @@
         <div class="row">
             <div class="left-column">
                 <div class="row">
-                    <p id="net-response"></p>
+                    <button id="check-button" class="button check-button">Check Labels</button>
                 </div>
                 <div class="row">
-                    <button id="check-button" class="button check-button">Check Labels</button>
+                    <div id="net-response-container" style="display: none; min-height: 40px;">
+                        <div id="net-response-text"></div>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="settings">
@@ -186,7 +188,8 @@
             const checkButton = document.getElementById('check-button');
 
             // Get paragraph to display response
-            const netResponse = document.getElementById('net-response')
+            const netResponseContainer = document.getElementById('net-response-container');
+            const netResponseText = document.getElementById('net-response-text');
 
             // Settings
             const settingsBtn = document.getElementById('settings-btn')
@@ -237,7 +240,10 @@
             }
 
             function updateLabeling(response) {
-                netResponse.textContent = response
+                // Update the text in the net-response-text div
+                netResponseText.textContent = response;
+                // Display the net-response-container
+                netResponseContainer.style.display = 'block';
             }
 
             // Send parts of upcoming instruction step via POST request
