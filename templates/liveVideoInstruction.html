@@ -128,14 +128,16 @@
                     <img class= "image instructionImg" id="instruction-image" src="{{ instruction_image }}" alt="Instruction Image">
                 </div>
                 <div class="row buttons">
-                    <button id="last-button" class="button last-button">Back</button>
-                    <button id="next-button" class="button next-button">Next</button>
-                </div>
-                <div class="row">
-                    <p id="net-response"></p>
+                    <button id="last-button" class="button last-button">Previous Step</button>
+                    <button id="next-button" class="button next-button">Next Step</button>
                 </div>
                 <div class="row">
                     <button id="check-button" class="button check-button">Check Labels</button>
+                </div>
+                <div class="row">
+                    <div id="net-response-container" style="display: none; min-height: 40px;">
+                        <div id="net-response-text"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,12 +188,14 @@
             const lastButton = document.getElementById('last-button');
             const checkButton = document.getElementById('check-button');
 
-            // Get paragraph to display response
-            const netResponse = document.getElementById('net-response')
-
             // Settings
             const settingsBtn = document.getElementById('settings-btn')
             const toggleBtn = document.getElementById('toggle-btn');
+
+            // Get paragraph to display response
+            const netResponseContainer = document.getElementById('net-response-container');
+            const netResponseText = document.getElementById('net-response-text');
+
             
             // Add functionality to Previous button
             lastButton.addEventListener('click', () => {
@@ -238,7 +242,10 @@
             }
 
             function updateLabeling(response) {
-                netResponse.textContent = response
+                // Update the text in the net-response-text div
+                netResponseText.textContent = response;
+                // Display the net-response-container
+                netResponseContainer.style.display = 'block';
             }
 
             // Send parts of upcoming instruction step via POST request
