@@ -84,30 +84,21 @@
             opacity: 0.6;
             pointer-events: none;
         }
-        .color-dropdown {
-            position: relative;
-            display: inline-block;
+        .mode-selection .assembly-button {
+            background-color: #969696;
+            color: #000000;
         }
-        .color-options {
-            position: absolute;
-            z-index: 1;
-            top: 100%;
-            left: 0;
-            display: none;
+        .mode-selection .disassembly-button {
+            background-color: #969696;
+            color: #000000;
         }
-        .color-dropdown.open .color-options {
-            display: block;
+        .mode-selection .assembly-button.selected {
+            background-color: #009682;
+            color: #FFFFFF;
         }
-        .settings {
-            display: flex;
-            flex-direction: column;
-            margin: 20px;
-        }
-        .settings-content div {
-            margin-bottom: 10px;
-        }
-        .settings-buttons {
-            margin-top: 20px;
+        .mode-selection .disassembly-button.selected {
+            background-color: #C91A09;
+            color: #FFFFFF;
         }
     </style>
 </head>
@@ -138,7 +129,7 @@
                 <p>ENJOY!</p>
             </div>
             <div class="mode-selection">
-                <button id="assembly-btn" class="button assembly-button">Assembly</button>
+                <button id="assembly-btn" class="button assembly-button selected">Assembly</button>
                 <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
                 <a href="/live" class="button go-button">GO</a>
             </div>
@@ -151,12 +142,20 @@
                     // Add functionality to Assembly button
                     assemblyBtn.addEventListener('click', () => {
                         start('assembly');
+                        selectMode(assemblyBtn, disassemblyBtn);
                     });
                     
                     // Add functionality to Disassembly button
                     disassemblyBtn.addEventListener('click', () => {
                         start('disassembly');
+                        selectMode(disassemblyBtn, assemblyBtn);
                     });
+
+                    // Helper function to handle mode selection
+                    function selectMode(selectedBtn, unselectedBtn) {
+                        selectedBtn.classList.add('selected');
+                        unselectedBtn.classList.remove('selected');
+                    }
                     
                     // Start live instruction via POST request
                     function start(mode) {
@@ -168,6 +167,10 @@
                             body: JSON.stringify({ mode: mode })
                         })
                             .then(response => response.json())
+                            .catch(error => {
+                                console.error('Error starting mode:', error);
+                                // Handle error, if necessary
+                            });
                     }
                 })
             </script>
