@@ -129,10 +129,10 @@
                         <div id="net-response-text"></div>
                     </div>
                 </div>
+                <!-- Advanced settings content -->
                 <div class="row">
                     <div class="settings">
                         <div id="advanced-settings" style="display: none;">
-                            <!-- Advanced settings content -->
                             <div class="settings-content">
                                 <div>
                                     <label for="coloring">Coloring:</label>
@@ -235,8 +235,6 @@
             function updateUI(step, pieces) {
                 // Update instruction image
                 instructionImage.src = `/resources/${step}.jpeg`;
-
-                // TODO: Update bounding boxes on video feed
             }
 
             function updateLabeling(response) {
