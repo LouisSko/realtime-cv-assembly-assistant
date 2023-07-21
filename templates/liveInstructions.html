@@ -9,12 +9,14 @@
             justify-content: space-between;
             padding: 20px;
             width: 100%;
+            background-color: #f0f0f0;
         }
 
         /* Image on the left */
         .left-image {
             width: 50px;
             height: 50px;
+            border-radius: 50%;
             /* Add any additional styles for the left image */
         }
 
@@ -24,11 +26,13 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
+            color: #333;
         }
 
         /* Image on the right */
         .right-image {
             width: 100px;
+            border-radius: 8px;
         }
 
         /* CSS styles for the layout */
@@ -36,89 +40,185 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
         }
+
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin: 20px auto;
         }
+
         .divider {
             width: 100%;
             height: 1px;
-            background-color: #000;
+            background-color: #ccc;
             margin: 20px 0;
         }
+
         .row {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
         }
+
         .left-column {
             flex: 1;
             margin-right: 20px;
             margin-left: 20px;
         }
+
         .right-column {
             flex: 1;
             margin-right: 20px;
             margin-left: 20px;
         }
+
         .live-video {
             width: 100%;
             height: auto;
+            border-radius: 8px;
         }
+
         .image {
             width: 100px;
             height: auto;
+            border-radius: 8px;
         }
+
         .buttons {
             display: flex;
             justify-content: center;
             margin-top: 20px;
         }
+
         .button {
             padding: 10px 20px;
             margin: 0 10px;
-            background: #FFFFFF;
-            border: 1px solid #000000;
-            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            background-color: #f0f0f0;
+            border: none;
             border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-        .last-button{
-            background-color: #C91A09;
-            color:#FFFFFF
+
+        .last-button {
+            color: #C91A09;
         }
-        .next-button{
-            background-color: #009682;
-            color:#FFFFFF
+
+        .next-button {
+            color: #009682;
         }
-        .instructionImg{
+
+        .check-button {
+            color: #333;
+        }
+
+        .button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .instructionImg {
             width: 100%;
             height: auto;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .settings {
             display: flex;
             flex-direction: column;
             margin: 20px;
         }
+
         .settings-content div {
             margin-bottom: 10px;
         }
+
         .settings-buttons {
             margin-top: 20px;
+        }
+
+        /* Additional styles for net-response-container */
+        #net-response-container {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        #net-response-text {
+            color: #333;
+        }
+
+        /* Additional styles for advanced settings */
+        #advanced-settings {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        #advanced-settings label {
+            margin-right: 10px;
+        }
+
+        #settings-btn {
+            color: #00bcd4;
+            margin-top: 10px;
+        }
+
+        #toggle-btn {
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Button style for advanced settings */
+        .settings-button {
+            color: #00bcd4;
+            margin-top: 10px;
+        }
+
+        .names-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .names-container p {
+            margin: 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="names-container">
+            <p>Constantin Hannes Ernstberger</p>
+            <p>Julian Sauer</p>
+            <p>Marcel Früholz</p>
+            <p>Louis Skowronek</p>
+            <p>Alex</p>
+        </div>
         <div class="top-section">
             <img src="resources/lego.png" alt="Left Image" class="left-image">
             <h1 class="title">LEGO Mindstorm: Real-time instruction manual</h1>
             <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
         </div>
-        <div class="divider"></div>
+        <p></p>
         <div class="row">
             <div class="left-column">
                 <div class="row">
