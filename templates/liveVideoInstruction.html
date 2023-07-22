@@ -199,6 +199,7 @@
             color: #666;
             margin-bottom: 10px;
         }
+
         .names-container p {
             margin: 0;
         }
@@ -363,7 +364,6 @@
                     console.error('Error sending pieces:', error);
                 });
             }
-            sendPieces("{{ pieces }}")
 
             // Add functionality to Advanced Settings button
             toggleBtn.addEventListener('click', () => {
@@ -399,6 +399,9 @@
                 
             // Set settings from home page on initial page load
             setSettings("single-color", "50", "", "", "")
+
+            // POST piec es of initial instruction step on page load
+            sendPieces("{{ pieces }}")
         })
 
     </script>
