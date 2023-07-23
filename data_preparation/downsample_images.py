@@ -42,13 +42,13 @@ def resize_images(input_dir, output_dir, max_width, max_height):
 if __name__ == '__main__':
 
     # Input directory path
-    input_directory_path_base = '/Users/louis.skowronek/AISS/aiss_images'
+    input_directory_path_base = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
 
     # Output directory path
-    output_directory_path_base = '/Users/louis.skowronek/AISS/aiss_images'
+    output_directory_path_base = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
 
     # Target resolution (1080p)
-    max_width = 1080
+    max_width = 1280
     max_height = 720
 
     # resize images in all three folders
