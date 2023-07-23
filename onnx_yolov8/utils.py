@@ -93,8 +93,13 @@ def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, 
 
             # Settings
             if multi_color == False:
-                # Set color
-                color = (102, 102, 255)
+                if displayAll is True and required_class_ids is not None and label not in required_class_ids:
+                     # Set color
+                    color = (179,179,179)
+                else:
+                    # Set color
+                    color = (102, 102, 255)
+                
                 # Draw rectangle
                 cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
                 # Draw fill rectangle in mask image
