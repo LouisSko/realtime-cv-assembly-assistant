@@ -209,7 +209,7 @@ def test_handle_labels_assembly_mode_missing_parts(client):
     assert response.status_code == 200
     assert response.is_json
     data = response.get_json()
-    assert data == {'message': 'Necessary pieces were not found. Check if all pieces are in the image.'}
+    assert data == {'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(x=1)}
 
 def test_handle_labels_assembly_mode(client):
     # Test handling labels in assembly mode when all necessary pieces are found
@@ -226,4 +226,40 @@ def test_handle_labels_assembly_mode(client):
     assert response.status_code == 200
     assert response.is_json
     data = response.get_json()
-    assert data == {'message': 'All necessary pieces were found. Grab the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'}
+    assert data == {'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'}
+
+def test_handle_labels_disassembly_mode_missing_parts(client):
+    # Test handling labels in disassembly mode when not all necessary pieces are found
+    client.post('/start', json={'mode': 'Disassembly'})
+    client.post('/send-pieces', json={'pieces': [LABELS[17]]})
+    data = [
+        {'label': '4', 'confidence': '0.8', 'boxes': '[10, 20, 100, 150]'}
+    ]
+    response = client.post('/detections', json=data)
+    assert response.status_code == 200
+    response = client.post('/labels', json=data)
+    assert response.status_code == 200
+    assert response.is_json
+    data = response.get_json()
+    assert data == {'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(x=1)}
+
+def test_handle_labels_disassembly_mode(client):
+    # Test handling labels in disassembly mode when all necessary pieces are found
+    client.post('/start', json={'mode': 'Disassembly'})
+    client.post('/send-pieces', json={'pieces': [LABELS[17]]})
+    data = [
+        {'label': '17', 'confidence': '0.8', 'boxes': '[10, 20, 100, 150]'}
+    ]
+    response = client.post('/detections', json=data)
+    assert response.status_code == 200
+    response = client.post('/labels', json=data)
+    assert response.status_code == 200
+    assert response.is_json
+    data = response.get_json()
+    assert data == {'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'}
+
+
+def test_handle_labels_invalid_step(client):
+    # Test handling labels with an invalid step
+    response = client.post('/labels', json={'step': 99})
+    assert response.status_code == 200

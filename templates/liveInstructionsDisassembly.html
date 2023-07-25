@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <<style>
+        /* Flex container for top section */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            width: 100%;
+            background-color: #f0f0f0;
+        }
+
+        /* Image on the left */
+        .left-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            /* Add any additional styles for the left image */
+        }
+
+        /* Title in the center */
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Image on the right */
+        .right-image {
+            width: 100px;
+            border-radius: 8px;
+        }
+
+        /* CSS styles for the layout */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #ccc;
+            margin: 20px 0;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .left-column {
+            flex: 1;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+
+        .right-column {
+            flex: 1;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+
+        .live-video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .image {
+            width: 100px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .last-button {
+            color: #009682;
+        }
+
+        .next-button {
+            color: #C91A09;
+        }
+
+        .check-button {
+            color: #333;
+        }
+
+        .button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .instructionImg {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings {
+            display: flex;
+            flex-direction: column;
+            margin: 20px;
+        }
+
+        .settings-content div {
+            margin-bottom: 10px;
+        }
+
+        .settings-buttons {
+            margin-top: 20px;
+        }
+
+        /* Additional styles for net-response-container */
+        #net-response-container {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        #net-response-text {
+            color: #333;
+        }
+
+        /* Additional styles for advanced settings */
+        #advanced-settings {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        #advanced-settings label {
+            margin-right: 10px;
+        }
+
+        #settings-btn {
+            color: #00bcd4;
+            margin-top: 10px;
+        }
+
+        #toggle-btn {
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Button style for advanced settings */
+        .settings-button {
+            color: #00bcd4;
+            margin-top: 10px;
+        }
+
+        .names-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .names-container p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="names-container">
+            <p>Constantin Hannes Ernstberger</p>
+            <p>Julian Sauer</p>
+            <p>Marcel Früholz</p>
+            <p>Louis Skowronek</p>
+            <p>Alexander Rothmaier</p>
+        </div>
+        <div class="top-section">
+            <img src="resources/lego.png" alt="Left Image" class="left-image">
+            <h1 class="title">LEGO Mindstorm: Real-Time Instruction Manual</h1>
+            <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
+        </div>
+        <p></p>
+        <div class="row">
+            <div class="left-column">
+                <img src="{{ url_for('video_feed') }}" alt="Camera Feed" class="live-video">
+            </div>
+            <div class="right-column">
+                <div class="row">
+                    <img class="image instructionImg" id="instruction-image" src="{{ instruction_image }}" alt="Instruction Image">
+                </div>
+                <div class="row buttons">
+                    <button id="next-button" class="button next-button">Previous Step</button>
+                    <button id="last-button" class="button last-button">Next Step</button>
+                </div>
+                <div class="row">
+                    <button id="check-button" class="button check-button">Check Labels</button>
+                </div>
+                <div class="row">
+                    <div id="net-response-container" style="display: none; min-height: 40px;">
+                        <div id="net-response-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Advanced settings content -->
+        <div class="row">
+            <div class="settings">
+                <div id="advanced-settings" style="display: none;">
+                    <div class="settings-content">
+                        <div>
+                            <label for="coloring">Coloring:</label>
+                            <input type="radio" id="single-color" name="coloring" value="single-color" checked="checked">
+                            <label for="single-color">One Color</label>
+                            <input type="radio" id="multi-color" name="coloring" value="multi-color">
+                            <label for="multi-color">Multiple Colors</label>
+                        </div>
+                        <div>
+                            <label for="confidence">Min Confidence:</label>
+                            <input type="text" id="confidence" name="confidence" value="50">
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-confidence" name="display-confidence">
+                            <label for="display-confidence">Display Confidence</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-label" name="display-label">
+                            <label for="display-label">Display Label Name</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="display-all" name="display-all">
+                            <label for="display-all">Display All Detected Parts</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row buttons">
+                    <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
+                    <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the instruction image element
+            const instructionImage = document.getElementById('instruction-image');
+    
+            // Get all buttons
+            const nextButton = document.getElementById('next-button');
+            const lastButton = document.getElementById('last-button');
+            const checkButton = document.getElementById('check-button');
+
+            // Settings
+            const settingsBtn = document.getElementById('settings-btn')
+            const toggleBtn = document.getElementById('toggle-btn');
+
+            // Get paragraph to display response
+            const netResponseContainer = document.getElementById('net-response-container');
+            const netResponseText = document.getElementById('net-response-text');
+
+            
+            // Add functionality to Previous button
+            lastButton.addEventListener('click', () => {
+                fetch('/previous', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data.step, data.pieces);
+                        updateLabeling("");
+                        sendPieces(data.pieces);
+                    });
+            });
+
+            // Add functionality to Next button
+            nextButton.addEventListener('click', () => {
+                fetch('/next', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUI(data.step, data.pieces);
+                        updateLabeling("");
+                        sendPieces(data.pieces);
+                    });
+            });
+
+            // Add functionality to Check button
+            checkButton.addEventListener('click', () => {
+                fetch('/detections') // Get the detections
+                    .then(response => response.json())
+                    .then(detections => {
+                        // Perform checks on the detections
+                        fetch('/labels', { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                updateLabeling(data.message);
+                            });
+                    });
+            });
+
+            // Update UI by changing instruction image
+            function updateUI(step, pieces) {
+                // Update instruction image
+                instructionImage.src = `/resources/${step}.jpeg`;
+            }
+
+            function updateLabeling(response) {
+                // Update the text in the net-response-text div
+                netResponseText.textContent = response;
+                // Display the net-response-container
+                netResponseContainer.style.display = 'block';
+            }
+
+            // Send parts of upcoming instruction step via POST request
+            function sendPieces(pieces) {
+                fetch('/send-pieces', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pieces: pieces })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => {
+                    console.error('Error sending pieces:', error);
+                });
+            }
+
+            // Add functionality to Advanced Settings button
+            toggleBtn.addEventListener('click', () => {
+                const advancedSettings = document.getElementById('advanced-settings');
+                const isHidden = advancedSettings.style.display === 'none';
+                advancedSettings.style.display = isHidden ? 'block' : 'none';
+                toggleBtn.textContent = isHidden ? 'Hide' : 'Advanced Settings';
+                settingsBtn.style.display = isHidden ? 'block' : 'none';
+            });
+
+            // Add functionality to Confrim button
+            settingsBtn.addEventListener('click', () => {
+                const coloring = document.querySelector('input[name="coloring"]:checked').value;
+                const confidence = document.getElementById('confidence').value;
+                const displayConfidence = document.getElementById('display-confidence').checked;
+                const displayLabel = document.getElementById('display-label').checked;
+                const displayAll = document.getElementById('display-all').checked;
+
+                setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll);
+            });
+            
+            // Set settings via POST request
+            function setSettings(coloring, confidence, displayConfidence, displayLabel, displayAll) {
+                fetch('/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ coloring, confidence, displayConfidence, displayLabel, displayAll })
+                })
+                    .then(response => response.json())
+            }
+                
+            // Set settings from home page on initial page load
+            setSettings("single-color", "50", "", "", "")
+
+            // POST piec es of initial instruction step on page load
+            sendPieces("{{ pieces }}")
+        })
+
+    </script>
+</body>
+</html>

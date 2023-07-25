@@ -92,7 +92,7 @@ def start():
     data = request.get_json()
     mode = data.get('mode')
 
-    if mode not in ['Assembly', 'disAssembly']:
+    if mode not in ['Assembly', 'Disassembly']:
         return jsonify({'error': 'Invalid mode'}), 400
 
     current_mode = mode
@@ -103,11 +103,16 @@ def start():
 # Load live instructions
 @app.route('/live')
 def live():
-    global current_step
+    global current_step, current_mode
     instruction_image = 'resources/{}.jpeg'.format(current_step)
-    return render_template('liveVideoInstruction.html', 
-                           instruction_image=instruction_image, 
-                           step=current_step, pieces=STEPS[current_step])
+    if current_mode == 'Assembly':
+        return render_template('liveInstructionsAssembly.html', 
+                            instruction_image=instruction_image, 
+                            step=current_step, pieces=STEPS[current_step])
+    else:
+        return render_template('liveInstructionsDisassembly.html', 
+                            instruction_image=instruction_image, 
+                            step=current_step, pieces=STEPS[current_step])
 
 # Go to next instruction step
 @app.route('/next', methods=['POST'])
@@ -176,6 +181,7 @@ def handle_labels():
     global current_step, current_mode, detection_results
 
     labels = []
+    missing = []
 
     # Get all relevant detections
     for detection in detection_results:
@@ -185,22 +191,28 @@ def handle_labels():
     # Check if all necessary parts were detected
     for part in STEPS_NO[current_step]:
         if part not in labels:
-            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
+            missing.append(part)
 
     if current_mode == "Assembly":
 
         # Check if not enough parts were detected in case of two of same kind are needed
         if len(labels) < len(STEPS_NO[current_step]):
-            return jsonify({'message': 'Necessary pieces were not found. Check if all pieces are in the image.'})
+            if len(missing) == 1:
+                return jsonify({'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(x=len(missing))})
+            else:
+                return jsonify({'message': 'There are {x} parts missing. Check if all pieces are in the view of the camera.'.format(x=len(missing))})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Grab the marked pieces from the video, which you can also see in the instruction picture, and follow the instructions.'})
+            return jsonify({'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'})
         
     else:
         if len(labels) < len(STEPS_NO[current_step]):
-            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disAssembly the parts displayed on the screen and place them within the image.'})
+            if len(missing) == 1:
+                return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(x=len(missing))})
+            else:
+                return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There are {x} parts missing.'.format(x=len(missing))})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disAssembly step.'})
-
+            return jsonify({'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
+        
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404       
