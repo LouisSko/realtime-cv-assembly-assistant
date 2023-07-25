@@ -1,9 +1,5 @@
-import cv2
 from flask import Flask, jsonify, render_template, Response, request
 import requests
-
-from onnx_yolov8.YOLOv8 import YOLOv8
-from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline
 
 
 app = Flask(__name__, static_folder='resources')
@@ -65,104 +61,9 @@ STEPS = {
     14: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
     15: [LABELS[17]]                                  # [wire]
 }
-
-
-# Define whether to use gstreamer pipeline or video
-cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
-
-
-# Initialize YOLOv8 model
-model_path = 'models/yolov8n_best.onnx'
-yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
-
-cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
-
-# th_diff=1 basically disables the detection
-motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
-
-def capture_camera():
-    while cap.isOpened():
-
-        settings_url = 'http://127.0.0.1:5000/settings'
-        response_settings = requests.get(settings_url)
-        if response_settings.status_code == 200:
-            settings_resp = response_settings.json()
-            coloring = settings_resp['coloring']
-            confidence = settings_resp['confidence']
-            displayConfidence = settings_resp['displayConfidence']
-            displayLabel = settings_resp['displayLabel']
-            displayAll = settings_resp['displayAll']
-
-            yolov8_detector.set_settings(coloring, confidence, displayAll, displayConfidence, displayLabel)
-
-        else:
-            print('Error:', response_settings.status_code)
-
-        # Press key q to stop
-        #if cv2.waitKey(1) == ord('q'):
-            #break
-
-        pieces_url = 'http://127.0.0.1:5000/send-pieces'
-        response = requests.get(pieces_url)
-        if response.status_code == 200:
-            pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
-        else:
-            print('Error:', response.status_code)
-
-        try:
-            # Read frame from the video
-            ret, frame = cap.read()
-            if not ret:
-                continue
-
-            # check whether there is motion in the image
-            motion = motion_detector.detect_motion(frame)
-            motion = False
-            # Update object localizer if there is no motion in the image
-            if not motion:
-                boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
-                frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
-
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-        except Exception as e:
-            print(e)
-            continue
-        
     
-        # Create a list to store the detection results
-        detection_results = []
-        # Format the detection results
-        if len(boxes)>0:
-            for i in range(0,len(boxes)):
-                result = {
-                    'label': str(class_ids[i]),
-                    'confidence': str(scores[i]),
-                    'boxes': str(boxes[i])
-                }
-                detection_results.append(result)
-
-            url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
-            headers = {'Content-Type': 'application/json'}
-            response = requests.post(url, json=detection_results, headers=headers)
-
-            # Check the response status code
-            if response.status_code != 200:
-                print("Error sending detection results")
-                
-
-    yolov8_detector.motion_prev = motion
-
-    #cv2.imshow("Detected Objects", frame)
-
-
-    
-current_mode = 'assembly'  # Default mode
-current_step = 1  # Default step for assembly mode
+current_mode = 'Assembly'  # Default mode
+current_step = 1  # Default step for Assembly mode
 detection_results = []
 necessary_pieces = []
 
@@ -192,11 +93,11 @@ def start():
     data = request.get_json()
     mode = data.get('mode')
 
-    if mode not in ['assembly', 'disassembly']:
+    if mode not in ['Assembly', 'disAssembly']:
         return jsonify({'error': 'Invalid mode'}), 400
 
     current_mode = mode
-    current_step = 1 if mode == 'assembly' else 15
+    current_step = 1 if mode == 'Assembly' else 15
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
@@ -252,12 +153,6 @@ def send_pieces():
 def get_pieces():
     return jsonify(necessary_pieces)
 
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(capture_camera(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
 # POST detected pieces
 @app.route('/detections', methods=['POST'])
 def handle_detections():
@@ -303,14 +198,13 @@ def handle_labels():
         
     else:
         if len(labels) < len(STEPS_NO[current_step]):
-            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the image.'})
+            return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disAssembly the parts displayed on the screen and place them within the image.'})
         else:
-            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disassembly step.'})
+            return jsonify({'message': 'All necessary pieces were found. Press "Back" to go to the next disAssembly step.'})
 
-# Handle error in case wrong page is opened
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('404.html'), 404           
+    return render_template('404.html'), 404       
 
 if __name__ == '__main__':
     app.run()
