@@ -1,5 +1,4 @@
 import pytest
-from flask import Flask
 from unit_test_app import app, LABELS, STEPS, STEPS_NO
 
 # Create a test client for the app
@@ -9,13 +8,19 @@ def client():
     with app.test_client() as client:
         yield client
 
-# Test cases for the HTTP requests
+########################## Test cases for the HTTP requests ##########################
 
 def test_index_page(client):
     # Test if the index page loads successfully
     response = client.get('/')
     assert response.status_code == 200
     assert b"LEGO Mindstorm: Real-Time Instruction Manual" in response.data
+
+def test_not_found_page(client):
+    # Test if accessing a non-existent page returns status code 404
+    response = client.get('/non-existent-page')
+    assert response.status_code == 404
+    assert b"404 Not Found" in response.data
 
 def test_set_settings(client):
     # Test if setting settings returns a JSON response with status code 200
@@ -143,12 +148,6 @@ def test_invalid_settings(client):
     assert response.status_code == 200
     assert response.is_json
     assert response.get_json() == 'Success'
-
-def test_not_found_page(client):
-    # Test if accessing a non-existent page returns status code 404
-    response = client.get('/non-existent-page')
-    assert response.status_code == 404
-    assert b"404 Not Found" in response.data
 
 def test_start_invalid_mode(client):
     # Test if starting with an invalid mode returns status code 400
