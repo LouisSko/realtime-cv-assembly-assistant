@@ -48,7 +48,7 @@ def annotate_images(model, dir_images, dir_annot_files):
 
 if __name__ == "__main__":
     # load a pretrained model
-    model = YOLO("/Users/louis.skowronek/Downloads/test/yolov8n_custom/weights/best.pt")
+    model = YOLO("/Users/louis.skowronek/Downloads/test/yolov8n_custom/weights/yolov8s_best.pt")
     # specify directories
     dir_images = '/Users/louis.skowronek/Downloads/generate_images/images'
     dir_annot_files = '/Users/louis.skowronek/Downloads/generate_images/labels'

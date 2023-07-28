@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 # load a pretrained model
-model = YOLO("/Users/louis.skowronek/Downloads/test/yolov8n_custom/weights/best.pt")
+model = YOLO("/Users/louis.skowronek/Downloads/test/yolov8n_custom/weights/yolov8s_best.pt")
 
 
 url = 'http://192.168.0.202:4747/video'
