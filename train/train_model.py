@@ -11,9 +11,6 @@ def train_yolo_v8():
                 epochs=5,
                 name='yolov8n_custom')
 
-    # Export the model to onnx
-    model.export(format='onnx', opset=15)
-
 if __name__ == '__main__':
     train_yolo_v8()
 
