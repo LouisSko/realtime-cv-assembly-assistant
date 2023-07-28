@@ -1,5 +1,6 @@
 flask
 pytest
+pytest-cov
 requests
 onnxruntime
 absl-py==1.4.0
