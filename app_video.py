@@ -3,85 +3,23 @@ from flask import Flask, jsonify, render_template, Response, request
 import requests
 
 from onnx_yolov8.YOLOv8 import YOLOv8
-from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline
+from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline, get_labels_steps
 
 
 app = Flask(__name__, static_folder='resources')
 
-
-LABELS = {
-    0: "grey_beam_bent",
-    1: "grey_axle_long_stop",
-    2: "grey_axle_short_stop",
-    3: "grey_axle_short",
-    4: "grey_axle_long",
-    5: "black_axle_pin_con",
-    6: "black_beam",
-    7: "black_pin_short",
-    8: "red_oct_con",
-    9: "red_pin_3L",
-    10: "blue_pin_3L",
-    11: "blue_axle_pin",
-    12: "white_beam_bent",
-    13: "white_beam_L",
-    14: "white_tooth",
-    15: "engine",
-    16: "wheel",
-    17: "wire"
-}
-
-STEPS_NO = {
-    1: [4, 8, 15],
-    2: [3],
-    3: [0, 10],
-    4: [10, 10, 13],
-    5: [11, 11, 12],
-    6: [1],
-    7: [6],
-    8: [7, 7],
-    9: [16],
-    10: [14],
-    11: [2],
-    12: [9, 9],
-    13: [5, 7, 11, 11],
-    14: [5, 7, 11, 11],
-    15: [17]
-}
-
-STEPS = {
-    1: [LABELS[8], LABELS[4], LABELS[15]],             # [red_oct_con, grey_axle_long, engine]
-    2: [LABELS[3]],                                   # [grey_axle_short]
-    3: [LABELS[0], LABELS[10]],                       # [grey_beam_bent, blue_pin_3L]
-    4: [LABELS[10], LABELS[10], LABELS[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
-    5: [LABELS[11], LABELS[11], LABELS[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
-    6: [LABELS[1]],                                   # [grey_axle_long_stop]
-    7: [LABELS[6]],                                   # [black_beam]
-    8: [LABELS[7], LABELS[7]],                        # [black_pin_short, black_pin_short]
-    9: [LABELS[16]],                                  # [wheel]
-    10: [LABELS[14]],                                 # [white_tooth]
-    11: [LABELS[2]],                                  # [grey_axle_short_stop]
-    12: [LABELS[9], LABELS[9]],                       # [red_pin_3L, red_pin_3L]
-    13: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
-    14: [LABELS[11], LABELS[11], LABELS[5], LABELS[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
-    15: [LABELS[17]]                                  # [wire]
-}
-
-
 # Define whether to use gstreamer pipeline or video
 cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
-
+# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
 # Initialize YOLOv8 model
 model_path = 'models/yolov8s_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
-cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
-
 # th_diff=1 basically disables the detection
 motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
-
+LABELS, STEPS_NO, STEPS = get_labels_steps()
 
 def capture_camera():
 
@@ -89,7 +27,10 @@ def capture_camera():
     class_ids = []
     scores = []
     boxes = []
+    pieces = []
     motion = True
+
+    # get labels, steps_no and steps
 
     while cap.isOpened():
 
@@ -108,10 +49,6 @@ def capture_camera():
         else:
             print('Error:', response_settings.status_code)
 
-        # Press key q to stop
-        #if cv2.waitKey(1) == ord('q'):
-            #break
-
         pieces_url = 'http://127.0.0.1:5000/send-pieces'
         response = requests.get(pieces_url)
         if response.status_code == 200:
@@ -127,11 +64,10 @@ def capture_camera():
 
             # check whether there is motion in the image
             motion = motion_detector.detect_motion(frame)
-            #motion = False
+
             # Update object localizer if there is no motion in the image
             if not motion:
                 boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
-
                 frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
 
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -142,8 +78,7 @@ def capture_camera():
         except Exception as e:
             print(e)
             continue
-        
-    
+
         # Create a list to store the detection results
         detection_results = []
         # Format the detection results

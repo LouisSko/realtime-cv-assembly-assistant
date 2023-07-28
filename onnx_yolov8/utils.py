@@ -3,7 +3,6 @@ import cv2
 import os
 
 
-#define the labels
 
 # Get the directory path of the current file
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,11 +10,11 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the relative path to the file you want to access
 labels_path = os.path.join(current_dir, 'classes.txt')
 
-#labels_path = '/object-detection-project/onnx_yolov8/yolov8/classes.txt'
 try:
     class_names = [name.strip() for name in open(labels_path).readlines()]
 except:
     print(f"Error while reading {labels_path}. Go into utils.py to change the path to classes.txt")
+
 
 # Create a list of colors for each class where each color is a tuple of 3 integer values
 rng = np.random.default_rng(3)
@@ -74,7 +73,7 @@ def xywh2xyxy(x):
     return y
 
 
-def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, mask_alpha=0.3, multi_color = False, displayAll = False, displayConfidence = False, displayLabel = False):
+def draw_detections(image, boxes, scores, class_ids, required_class_ids=None, mask_alpha=0.3, multi_color=False, displayAll=False, displayConfidence=False, displayLabel=False):
 
     mask_img = image.copy()
     det_img = image.copy()
@@ -95,7 +94,7 @@ def draw_detections(image, boxes, scores, class_ids, required_class_ids = None, 
             if multi_color == False:
                 if displayAll is True and required_class_ids is not None and label not in required_class_ids:
                      # Set color
-                    color = (179,179,179)
+                    color = (179, 179, 179)
                 else:
                     # Set color
                     color = (102, 102, 255)
@@ -203,7 +202,7 @@ def gstreamer_pipeline(
     # capture_height=720,
     display_width=1280,
     display_height=720,
-    framerate=21,
+    framerate=10,
     flip_method=0,
 ):
     return (
@@ -223,4 +222,49 @@ def gstreamer_pipeline(
             display_height,
         )
     )
+
+
+def get_labels_steps():
+    labels = {i: class_name for i, class_name in enumerate(class_names)}
+
+    steps_no = {
+        1: [4, 8, 15],
+        2: [3],
+        3: [0, 10],
+        4: [10, 10, 13],
+        5: [11, 11, 12],
+        6: [1],
+        7: [6],
+        8: [7, 7],
+        9: [16],
+        10: [14],
+        11: [2],
+        12: [9, 9],
+        13: [5, 7, 11, 11],
+        14: [5, 7, 11, 11],
+        15: [17]
+    }
+
+    steps = {step: [labels[i] for i in num_list] for step, num_list in steps_no.items()}
+
+    #output
+    #steps = {
+    #    1: [labels[8], labels[4], labels[15]],             # [red_oct_con, grey_axle_long, engine]
+    #    2: [labels[3]],                                   # [grey_axle_short]
+    #    3: [labels[0], labels[10]],                       # [grey_beam_bent, blue_pin_3L]
+    #    4: [labels[10], labels[10], labels[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
+    #    5: [labels[11], labels[11], labels[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
+    #    6: [labels[1]],                                   # [grey_axle_long_stop]
+    #    7: [labels[6]],                                   # [black_beam]
+    #    8: [labels[7], labels[7]],                        # [black_pin_short, black_pin_short]
+    #    9: [labels[16]],                                  # [wheel]
+    #    10: [labels[14]],                                 # [white_tooth]
+    #    11: [labels[2]],                                  # [grey_axle_short_stop]
+    #    12: [labels[9], labels[9]],                       # [red_pin_3L, red_pin_3L]
+    #    13: [labels[11], labels[11], labels[5], labels[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    #    14: [labels[11], labels[11], labels[5], labels[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    #    15: [labels[17]]                                  # [wire]
+    #}
+
+    return labels, steps_no, steps
 
