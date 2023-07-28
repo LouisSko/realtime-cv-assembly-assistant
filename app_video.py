@@ -73,7 +73,7 @@ cap = cv2.VideoCapture('videos/IMG_4594.MOV')
 
 
 # Initialize YOLOv8 model
-model_path = 'models/yolov8n_best.onnx'
+model_path = 'models/yolov8s_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
@@ -81,7 +81,16 @@ cv2.namedWindow("Detected Objects", cv2.WINDOW_NORMAL)
 # th_diff=1 basically disables the detection
 motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
+
+
 def capture_camera():
+
+    # initialise variables
+    class_ids = []
+    scores = []
+    boxes = []
+    motion = True
+
     while cap.isOpened():
 
         settings_url = 'http://127.0.0.1:5000/settings'
@@ -118,10 +127,11 @@ def capture_camera():
 
             # check whether there is motion in the image
             motion = motion_detector.detect_motion(frame)
-            motion = False
+            #motion = False
             # Update object localizer if there is no motion in the image
             if not motion:
                 boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
+
                 frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
 
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -137,8 +147,8 @@ def capture_camera():
         # Create a list to store the detection results
         detection_results = []
         # Format the detection results
-        if len(boxes)>0:
-            for i in range(0,len(boxes)):
+        if len(boxes) > 0:
+            for i in range(0, len(boxes)):
                 result = {
                     'label': str(class_ids[i]),
                     'confidence': str(scores[i]),
@@ -154,7 +164,7 @@ def capture_camera():
             if response.status_code != 200:
                 print("Error sending detection results")
                 
-
+    # update motion information
     yolov8_detector.motion_prev = motion
 
     #cv2.imshow("Detected Objects", frame)
@@ -200,6 +210,7 @@ def start():
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
+
 # Load live instructions
 @app.route('/live')
 def live():
@@ -213,6 +224,7 @@ def live():
         return render_template('liveInstructionsDisassembly.html', 
                             instruction_image=instruction_image, 
                             step=current_step, pieces=STEPS[current_step])
+
 
 # Go to next instruction step
 @app.route('/next', methods=['POST'])
@@ -242,6 +254,7 @@ def previous_step():
 
     return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
+
 # POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
 def send_pieces():
@@ -251,6 +264,7 @@ def send_pieces():
 
     # Return a response to indicate successful processing
     return jsonify({'message': 'Necessary pieces sent successfully'})
+
 
 # GET all necssary pices of current instruction stepp
 @app.route('/send-pieces', methods=['GET'])
