@@ -18,5 +18,3 @@ if __name__ == '__main__':
     train_yolo_v8()
 
 
-    # TODO: hier direkt exportieren
-    
