@@ -35,7 +35,7 @@ You only need to perform these steps once to set up the project.
    More details on other versions can be found [here](https://elinux.org/Jetson_Zoo#ONNX_Runtime).
 
     ```
-    cd object-detection-project/
+    cd path/to/object-detection-project/
     wget https://nvidia.box.com/shared/static/jy7nqva7l88mq9i8bw3g3sklzf4kccn2.whl -O onnxruntime_gpu-1.10.0-cp36-cp36m-linux_aarch64.whl
     ```
 
@@ -46,14 +46,14 @@ Perform these steps every time you want to run the application.
 1. **Navigate to the `jetson-inference` directory, run the container, and mount the `object-detection-project` repository into it.** 
 
     ```
-    cd jetson-inference/
+    cd path/to/jetson-inference/
     docker/run.sh --volume /home/aiss/object-detection-project:/object-detection-project
     ```
 
 2. **Navigate into the `object-detection-project`.** 
 
     ```
-    cd /object-detection-project
+    cd path/to/object-detection-project
     ```
 
 3. **Install onnxruntime-gpu.** 
