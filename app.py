@@ -16,7 +16,7 @@ model_path = 'models/yolov8s_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # th_diff=1 basically disables the detection
-motion_detector = MotionDetector(threshold=20, th_diff=0.2, skip_frames=30)
+motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
 LABELS, STEPS_NO, STEPS = get_labels_steps()
 
@@ -30,7 +30,7 @@ def capture_camera():
     motion = True
     frame_counter = 0
 
-    skip_frames = 3
+    skip_frames = 5
 
 
     while cap.isOpened():
@@ -65,16 +65,19 @@ def capture_camera():
             if not ret:
                 continue
 
-            # check whether there is motion in the image
-            motion = motion_detector.detect_motion(frame)
+            # make detections every n frames
+            if frame_counter >= skip_frames:
 
-            # make detections only if there is no motion and only every n frames
-            if motion:
-                boxes, scores, class_ids = yolov8_detector.no_detections()
-            else:
-                if frame_counter >= skip_frames:
+                frame_counter = 0
+
+                # check whether there is motion in the image
+                motion = motion_detector.detect_motion(frame)
+
+                # make detections only if there is no motion
+                if motion:
+                    boxes, scores, class_ids = yolov8_detector.no_detections()
+                else:
                     boxes, scores, class_ids = yolov8_detector.detect_objects(frame)
-                    frame_counter = 0
 
             # draw overlay
             frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
