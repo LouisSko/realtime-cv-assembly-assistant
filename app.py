@@ -9,14 +9,14 @@ app = Flask(__name__, static_folder='resources')
 
 # Define whether to use gstreamer pipeline or video
 cap = cv2.VideoCapture('videos/IMG_4594.MOV')
-# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
 # Initialize YOLOv8 model
 model_path = 'models/yolov8s_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # th_diff=1 basically disables the detection
-motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
+motion_detector = MotionDetector(threshold=20, th_diff=0.2, skip_frames=30)
 
 LABELS, STEPS_NO, STEPS = get_labels_steps()
 
@@ -28,8 +28,10 @@ def capture_camera():
     boxes = []
     pieces = []
     motion = True
+    frame_counter = 0
 
-    # get labels, steps_no and steps
+    skip_frames = 3
+
 
     while cap.isOpened():
 
@@ -58,22 +60,31 @@ def capture_camera():
         try:
             # Read frame from the video
             ret, frame = cap.read()
+            frame_counter += 1
+
             if not ret:
                 continue
 
             # check whether there is motion in the image
             motion = motion_detector.detect_motion(frame)
 
-            # Update object localizer if there is no motion in the image
-            if not motion:
-                boxes, scores, class_ids = yolov8_detector(frame, motion, skip_frames=0)
-                frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
+            # make detections only if there is no motion and only every n frames
+            if motion:
+                boxes, scores, class_ids = yolov8_detector.no_detections()
+            else:
+                if frame_counter >= skip_frames:
+                    boxes, scores, class_ids = yolov8_detector.detect_objects(frame)
+                    frame_counter = 0
+
+            # draw overlay
+            frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
 
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
 
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
         except Exception as e:
             print(e)
             continue
@@ -97,9 +108,7 @@ def capture_camera():
             # Check the response status code
             if response.status_code != 200:
                 print("Error sending detection results")
-                
-    # update motion information
-    yolov8_detector.motion_prev = motion
+
 
     #cv2.imshow("Detected Objects", frame)
 
