@@ -33,18 +33,6 @@ class YOLOv8:
         # Initialize model
         self.initialize_model(path)
 
-    def __call__(self, image, motion, skip_frames):
-
-        if self.motion_prev != motion:
-            return self.detect_objects(image)
-
-        else:
-            # detect objects every n frames
-            self.comparison_frame_counter += 1
-            if self.comparison_frame_counter >= skip_frames:
-                # reset comparison counter
-                self.comparison_frame_counter = 0
-                return self.detect_objects(image)
 
     def initialize_model(self, path):
         self.session = onnxruntime.InferenceSession(path,
@@ -64,6 +52,10 @@ class YOLOv8:
 
         return self.boxes, self.scores, self.class_ids
 
+    def no_detections(self):
+        self.boxes, self.scores, self.class_ids = [], [], []
+        return self.boxes, self.scores, self.class_ids
+
     def prepare_input(self, image):
         self.img_height, self.img_width = image.shape[:2]
 
@@ -78,6 +70,7 @@ class YOLOv8:
         input_tensor = input_img[np.newaxis, :, :, :].astype(np.float32)
 
         return input_tensor
+
 
     def inference(self, input_tensor):
         start = time.perf_counter()
