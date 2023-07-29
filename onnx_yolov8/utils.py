@@ -196,10 +196,10 @@ class MotionDetector:
 
 def gstreamer_pipeline(
     sensor_id=0,
-    capture_width=3246,
-    capture_height=1848,
-    # capture_width=1280,
-    # capture_height=720,
+    #capture_width=3246,
+    #capture_height=1848,
+    capture_width=1280,
+    capture_height=720,
     display_width=1280,
     display_height=720,
     framerate=10,
