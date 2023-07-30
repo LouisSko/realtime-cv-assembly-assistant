@@ -2,102 +2,115 @@ import cv2
 from flask import Flask, jsonify, render_template, Response, request
 import requests
 from onnx_yolov8.YOLOv8 import YOLOv8
-from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline, get_labels_steps
+from onnx_yolov8.utils import MotionDetector, get_labels_steps
 
+# Start of Flask application definition
 app = Flask(__name__, static_folder='resources')
 
+# Configurations for the video capture method
 # Define whether to use gstreamer pipeline or video
 cap = cv2.VideoCapture('videos/IMG_4594.MOV')
+# Uncomment below line to use gstreamer pipeline
 # cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
-# Initialize YOLOv8 model
+# Configurations for the YOLOv8 model
+# Path to the model
 model_path = 'models/yolov8s_best.onnx'
+# Initialize the YOLOv8 model with given configurations
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
-# th_diff=1 basically disables the detection
+# Configurations for the Motion Detector
+# Initialize the MotionDetector with given configurations
 motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
-# Initialize global variables
+# Configurations for the assembly steps
+# Get the labels and steps information
 LABELS, STEPS_NO, STEPS = get_labels_steps()
-current_mode = 'Assembly'  # Default mode
-current_step = 1  # Default step for assembly mode
+# Set the default mode, step for assembly, detection results and necessary pieces
+current_mode = 'Assembly'
+current_step = 1
 detection_results = []
 necessary_pieces = []
 
 
 def capture_camera():
-    # initialise variables
-    class_ids = []
-    scores = []
-    boxes = []
-    pieces = []
-    motion = True
+    """
+    This function is responsible for capturing frames from the camera,
+    performing object detection, and returning the detection results.
+    """
+
+    # Initialize variables
     frame_counter = 0
+    skip_frames = 5  # number of frames to skip before performing detection
 
-    skip_frames = 5
-
-    settings_url = 'http://127.0.0.1:5000/settings'
-    pieces_url = 'http://127.0.0.1:5000/send-pieces'
+    # Define endpoints for settings, pieces, and detections
+    settings_endpoint = 'http://127.0.0.1:5000/settings'
+    pieces_endpoint = 'http://127.0.0.1:5000/send-pieces'
+    detections_endpoint = 'http://127.0.0.1:5000/detections'
 
     while cap.isOpened():
 
-        set_detector_settings(yolov8_detector, settings_url)
-        pieces = get_current_pieces(pieces_url)
+        # Read frame from the video
+        retrieved_frame, frame = cap.read()
+        frame_counter += 1
 
-        try:
-            # Read frame from the video
-            ret, frame = cap.read()
-            frame_counter += 1
-
-            if not ret:
-                continue
-
-            # make detections every n frames
-            if frame_counter >= skip_frames:
-                frame_counter = 0
-                # check whether there is motion in the image
-                motion = motion_detector.detect_motion(frame)
-
-                # make detections only if there is no motion
-                if motion:
-                    boxes, scores, class_ids = yolov8_detector.no_detections()
-                else:
-                    boxes, scores, class_ids = yolov8_detector.detect_objects(frame)
-
-            # draw overlay
-            frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
-
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-        except Exception as e:
-            print(e)
+        # Continue to the next iteration if no frame is retrieved
+        if not retrieved_frame:
             continue
 
-        # Create a list to store the detection results
-        detection_results = []
-        # Format the detection results
-        if len(boxes) > 0:
-            for i in range(0, len(boxes)):
-                result = {
-                    'label': str(class_ids[i]),
-                    'confidence': str(scores[i]),
-                    'boxes': str(boxes[i])
-                }
-                detection_results.append(result)
+        # Perform detection every n frames (determined by `skip_frames`)
+        if frame_counter >= skip_frames:
 
-            url = 'http://127.0.0.1:5000/detections'  # Update with the appropriate URL
-            headers = {'Content-Type': 'application/json'}
-            response = requests.post(url, json=detection_results, headers=headers)
+            # Reset frame counter
+            frame_counter = 0
 
-            # Check the response status code
-            if response.status_code != 200:
-                print("Error sending detection results")
+            # Update detector settings and get required pieces
+            update_detector_settings(yolov8_detector, settings_endpoint)
+            pieces = get_required_pieces(pieces_endpoint)
 
-    # cv2.imshow("Detected Objects", frame)
+            # Detect motion in the frame
+            motion = motion_detector.detect_motion(frame)
+
+            # If there is motion, no detections are performed
+            if motion:
+                boxes, scores, class_ids = yolov8_detector.no_detections()
+            else:  # If there is no motion, perform detections
+                boxes, scores, class_ids = yolov8_detector.detect_objects(frame)
+
+            # Format and post detection results
+            detection_results = format_detection_results(boxes, class_ids, scores)
+            post_detection_results(detection_results, detections_endpoint)
+
+            # Draw detections on the frame and convert it to jpeg format
+            frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
+            jpeg_frame = encode_frame_to_jpeg(frame)
+
+            # Yield the frame in HTTP response format
+            yield format_http_response(jpeg_frame)
+
+
+def encode_frame_to_jpeg(frame):
+    """
+    This function encodes a given frame into JPEG format.
+
+    :param frame: The frame to be encoded.
+    :return: The frame in JPEG format.
+    """
+    _, buffer = cv2.imencode('.jpg', frame)
+    jpeg_frame = buffer.tobytes()
+    return jpeg_frame
+
+
+def format_http_response(jpeg_frame):
+    """
+    This function formats the given JPEG frame into a HTTP response.
+
+    :param jpeg_frame: The JPEG frame to be sent in the response.
+    :return: The HTTP response.
+    """
+    http_response = (b'--frame\r\n'
+                     b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n\r\n')
+    return http_response
 
 
 def get_response_from_url(url):
@@ -109,7 +122,7 @@ def get_response_from_url(url):
         return None
 
 
-def set_detector_settings(detector, settings_url):
+def update_detector_settings(detector, settings_url):
     settings_resp = get_response_from_url(settings_url)
     if settings_resp is not None:
         coloring = settings_resp['coloring']
@@ -121,11 +134,27 @@ def set_detector_settings(detector, settings_url):
         detector.set_settings(coloring, confidence, displayAll, displayConfidence, displayLabel)
 
 
-def get_current_pieces(pieces_url):
+def get_required_pieces(pieces_url):
     response = get_response_from_url(pieces_url)
     if response is not None:
         return response  # is a list of labels e.g. ['grey4', 'wire']
     return None
+
+
+def format_detection_results(boxes, class_ids, scores):
+    detection_results = [{'label': str(class_id), 'confidence': str(score), 'boxes': str(box)}
+                         for box, class_id, score in zip(boxes, class_ids, scores)]
+
+    return detection_results
+
+
+def post_detection_results(detection_results, detection_url):
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(detection_url, json=detection_results, headers=headers)
+
+    # Check the response status code
+    if response.status_code != 200:
+        print("Error sending detection results")
 
 
 # Load Homepage
@@ -277,29 +306,29 @@ def handle_labels():
         if len(labels) < len(STEPS_NO[current_step]):
             if len(missing) == 1:
                 return jsonify({
-                                   'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(
-                                       x=len(missing))})
+                    'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(
+                        x=len(missing))})
             else:
                 return jsonify({
-                                   'message': 'There are {x} parts missing. Check if all pieces are in the view of the camera.'.format(
-                                       x=len(missing))})
+                    'message': 'There are {x} parts missing. Check if all pieces are in the view of the camera.'.format(
+                        x=len(missing))})
         else:
             return jsonify({
-                               'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'})
+                'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'})
 
     else:
         if len(labels) < len(STEPS_NO[current_step]):
             if len(missing) == 1:
                 return jsonify({
-                                   'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(
-                                       x=len(missing))})
+                    'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(
+                        x=len(missing))})
             else:
                 return jsonify({
-                                   'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There are {x} parts missing.'.format(
-                                       x=len(missing))})
+                    'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There are {x} parts missing.'.format(
+                        x=len(missing))})
         else:
             return jsonify({
-                               'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
+                'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
 
 
 # Handle error in case wrong page is opened
