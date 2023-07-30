@@ -4,7 +4,6 @@ import requests
 from onnx_yolov8.YOLOv8 import YOLOv8
 from onnx_yolov8.utils import MotionDetector, gstreamer_pipeline, get_labels_steps
 
-
 app = Flask(__name__, static_folder='resources')
 
 # Define whether to use gstreamer pipeline or video
@@ -18,10 +17,15 @@ yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 # th_diff=1 basically disables the detection
 motion_detector = MotionDetector(threshold=20, th_diff=1, skip_frames=30)
 
+# Initialize global variables
 LABELS, STEPS_NO, STEPS = get_labels_steps()
+current_mode = 'Assembly'  # Default mode
+current_step = 1  # Default step for assembly mode
+detection_results = []
+necessary_pieces = []
+
 
 def capture_camera():
-
     # initialise variables
     class_ids = []
     scores = []
@@ -32,30 +36,13 @@ def capture_camera():
 
     skip_frames = 5
 
+    settings_url = 'http://127.0.0.1:5000/settings'
+    pieces_url = 'http://127.0.0.1:5000/send-pieces'
 
     while cap.isOpened():
 
-        settings_url = 'http://127.0.0.1:5000/settings'
-        response_settings = requests.get(settings_url)
-        if response_settings.status_code == 200:
-            settings_resp = response_settings.json()
-            coloring = settings_resp['coloring']
-            confidence = settings_resp['confidence']
-            displayConfidence = settings_resp['displayConfidence']
-            displayLabel = settings_resp['displayLabel']
-            displayAll = settings_resp['displayAll']
-
-            yolov8_detector.set_settings(coloring, confidence, displayAll, displayConfidence, displayLabel)
-
-        else:
-            print('Error:', response_settings.status_code)
-
-        pieces_url = 'http://127.0.0.1:5000/send-pieces'
-        response = requests.get(pieces_url)
-        if response.status_code == 200:
-            pieces = response.json()  # is a list of labels e.g. ['grey4', 'wire']
-        else:
-            print('Error:', response.status_code)
+        set_detector_settings(yolov8_detector, settings_url)
+        pieces = get_current_pieces(pieces_url)
 
         try:
             # Read frame from the video
@@ -67,9 +54,7 @@ def capture_camera():
 
             # make detections every n frames
             if frame_counter >= skip_frames:
-
                 frame_counter = 0
-
                 # check whether there is motion in the image
                 motion = motion_detector.detect_motion(frame)
 
@@ -86,7 +71,7 @@ def capture_camera():
             frame = buffer.tobytes()
 
             yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
         except Exception as e:
             print(e)
@@ -112,21 +97,42 @@ def capture_camera():
             if response.status_code != 200:
                 print("Error sending detection results")
 
+    # cv2.imshow("Detected Objects", frame)
 
-    #cv2.imshow("Detected Objects", frame)
+
+def get_response_from_url(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print('Error:', response.status_code)
+        return None
 
 
-# Initialize global variables 
-current_mode = 'Assembly'  # Default mode
-current_step = 1  # Default step for assembly mode
-detection_results = []
-necessary_pieces = []
+def set_detector_settings(detector, settings_url):
+    settings_resp = get_response_from_url(settings_url)
+    if settings_resp is not None:
+        coloring = settings_resp['coloring']
+        confidence = settings_resp['confidence']
+        displayConfidence = settings_resp['displayConfidence']
+        displayLabel = settings_resp['displayLabel']
+        displayAll = settings_resp['displayAll']
+
+        detector.set_settings(coloring, confidence, displayAll, displayConfidence, displayLabel)
+
+
+def get_current_pieces(pieces_url):
+    response = get_response_from_url(pieces_url)
+    if response is not None:
+        return response  # is a list of labels e.g. ['grey4', 'wire']
+    return None
 
 
 # Load Homepage
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 # Post user settings
 @app.route('/settings', methods=['POST'])
@@ -135,10 +141,12 @@ def set_settings():
     settings = request.get_json()
     return jsonify('Success')
 
+
 # Get user settings
 @app.route('/settings', methods=['GET'])
 def get_settings():
     return jsonify(settings)
+
 
 # Set mode and first instruction
 @app.route('/start', methods=['POST'])
@@ -163,13 +171,13 @@ def live():
     global current_step, current_mode
     instruction_image = 'resources/{}.jpeg'.format(current_step)
     if current_mode == 'Assembly':
-        return render_template('liveInstructionsAssembly.html', 
-                            instruction_image=instruction_image, 
-                            step=current_step, pieces=STEPS[current_step])
+        return render_template('liveInstructionsAssembly.html',
+                               instruction_image=instruction_image,
+                               step=current_step, pieces=STEPS[current_step])
     else:
-        return render_template('liveInstructionsDisassembly.html', 
-                            instruction_image=instruction_image, 
-                            step=current_step, pieces=STEPS[current_step])
+        return render_template('liveInstructionsDisassembly.html',
+                               instruction_image=instruction_image,
+                               step=current_step, pieces=STEPS[current_step])
 
 
 # Go to next instruction step
@@ -184,7 +192,8 @@ def next_step():
     if current_step > 15:
         current_step = 15
 
-    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
+
 
 # Go to previous instruction step
 @app.route('/previous', methods=['POST'])
@@ -198,7 +207,7 @@ def previous_step():
     if current_step < 1:
         current_step = 1
 
-    return jsonify({'step': current_step,'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
+    return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 
 # POST all necessary pieces of current instruction step
@@ -229,17 +238,20 @@ def handle_detections():
     global detection_results
 
     data = request.get_json()
-    if not isinstance(data, list) or not all(isinstance(d, dict) and 'label' in d and 'confidence' in d and 'boxes' in d for d in data):
+    if not isinstance(data, list) or not all(
+            isinstance(d, dict) and 'label' in d and 'confidence' in d and 'boxes' in d for d in data):
         return 'Invalid detection results data', 400
 
     detection_results = data
 
     return 'Detection results received.'
 
+
 # GET detected pieces
 @app.route('/detections', methods=['GET'])
 def get_detections():
     return jsonify(detection_results)
+
 
 # POST results of check
 @app.route('/labels', methods=['POST'])
@@ -264,25 +276,37 @@ def handle_labels():
         # Check if not enough parts were detected in case of two of same kind are needed
         if len(labels) < len(STEPS_NO[current_step]):
             if len(missing) == 1:
-                return jsonify({'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(x=len(missing))})
+                return jsonify({
+                                   'message': 'There is {x} part missing. Check if all pieces are in the view of the camera.'.format(
+                                       x=len(missing))})
             else:
-                return jsonify({'message': 'There are {x} parts missing. Check if all pieces are in the view of the camera.'.format(x=len(missing))})
+                return jsonify({
+                                   'message': 'There are {x} parts missing. Check if all pieces are in the view of the camera.'.format(
+                                       x=len(missing))})
         else:
-            return jsonify({'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'})
-        
+            return jsonify({
+                               'message': 'All necessary LEGO parts were found. Please grab the marked parts and follow the assembly instructions. Afterwards, press "Next steps" to continue.'})
+
     else:
         if len(labels) < len(STEPS_NO[current_step]):
             if len(missing) == 1:
-                return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(x=len(missing))})
+                return jsonify({
+                                   'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There is {x} part missing.'.format(
+                                       x=len(missing))})
             else:
-                return jsonify({'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There are {x} parts missing.'.format(x=len(missing))})
+                return jsonify({
+                                   'message': 'You did not disassemble the correct parts. Make sure to only disassembly the parts displayed on the screen and place them within the view. There are {x} parts missing.'.format(
+                                       x=len(missing))})
         else:
-            return jsonify({'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
+            return jsonify({
+                               'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
+
 
 # Handle error in case wrong page is opened
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('404.html'), 404           
+    return render_template('404.html'), 404
+
 
 if __name__ == '__main__':
     app.run()
