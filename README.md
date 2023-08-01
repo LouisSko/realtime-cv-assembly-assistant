@@ -10,13 +10,13 @@ Simply use a compatible pre-built Jetson-Inference docker image and download the
 
 You only need to perform these steps once to set up the project.
 
-1.c**Clone object-detection-project repository.** 
+1.**Clone object-detection-project repository.** 
 
     ```
     git clone https://git.scc.kit.edu/aiss-applications-in-computer-vision/object-detection-project
     ```
    
-2. **Download the pre-built Docker image Jetson-Inference.** 
+2.**Download the pre-built Docker image Jetson-Inference.** 
 
     For Jetpack 4.6.1, use this version. More details on other versions can be found [here](https://github.com/dusty-nv/jetson-inference/blob/master/docs/aux-docker.md).
 
@@ -25,7 +25,7 @@ You only need to perform these steps once to set up the project.
     ```
 
 
-3**Navigate into the `object-detection-project/downloads` directory and download the correct version of onnxruntime-gpu.**
+3. **Navigate into the `object-detection-project/downloads` directory and download the correct version of onnxruntime-gpu.**
    
    More details on other versions can be found [here](https://elinux.org/Jetson_Zoo#ONNX_Runtime).
 
