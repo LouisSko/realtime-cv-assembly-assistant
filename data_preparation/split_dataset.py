@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 from tqdm import tqdm
+import argparse
 
 
 def split_dataset(input_dir, output_dir, split_ratio=(0.8, 0.1, 0.1)):
@@ -63,16 +64,31 @@ def move_files(file_list, input_dir, output_dir):
         except Exception as e:
             print(f'error at file {image_src}, {label_file}: {e}')
 
+def tuple_type(s):
+    try:
+        return tuple(map(float, s.split(',')))
+    except:
+        raise argparse.ArgumentTypeError('Split ratios must be x,y,z')
 
 if __name__ == "__main__":
-    # Input directory path. Should contain a folder images and labels
-    input_directory = '/Users/louis.skowronek/AISS/generate_images'
+    parser = argparse.ArgumentParser(description='Split dataset into train, test and validation sets.')
+    parser.add_argument('--input_dir', type=str, default='/Users/louis.skowronek/AISS/generate_images',
+                        help='Input directory path. Should contain folders "images" and "labels".')
+    parser.add_argument('--output_dir', type=str,
+                        help='Output directory path. Default is the same as the input directory.')
+    parser.add_argument('--split_ratio', type=tuple_type, default=(0.8, 0.1, 0.1),
+                        help='Split ratio for train, test and validation sets. Must be a comma-separated string.')
+    args = parser.parse_args()
 
-    # Output directory path
-    output_directory = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
+    # If output_dir is not specified, use input_dir as default
+    if args.output_dir is None:
+        args.output_dir = args.input_dir
 
-    # Split ratio (train, test, val)
-    split_ratio = (0.8, 0.1, 0.1)
+    split_dataset(args.input_dir, args.output_dir, args.split_ratio)
 
-    # Split the dataset
-    split_dataset(input_directory, output_directory, split_ratio)
+
+
+
+
+
+

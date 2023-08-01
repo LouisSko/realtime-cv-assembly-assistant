@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 from tqdm import tqdm
-
+import argparse
 
 def resize_images(input_dir, output_dir, max_width, max_height):
 
@@ -39,22 +39,29 @@ def resize_images(input_dir, output_dir, max_width, max_height):
             resized_img.save(output_file_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Resize Images")
 
-    # Input directory path
-    input_directory_path_base = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
+    parser.add_argument("--input_dir_base", default="/Users/louis.skowronek/AISS/generate_images/yolo_images",
+                        help="Base input directory path")
+    parser.add_argument("--output_dir_base", default=None,
+                        help="Base output directory path. If None, it will be the same as input_dir_base")
+    parser.add_argument("--max_width", type=int, default=1280,
+                        help="Maximum width for the resized images")
+    parser.add_argument("--max_height", type=int, default=720,
+                        help="Maximum height for the resized images")
 
-    # Output directory path
-    output_directory_path_base = '/Users/louis.skowronek/AISS/generate_images/yolo_images'
+    args = parser.parse_args()
 
-    # Target resolution (1080p)
-    max_width = 1280
-    max_height = 720
+    # If no output directory is provided, use the input directory as the output directory
+    if args.output_dir_base is None:
+        args.output_dir_base = args.input_dir_base
 
-    # resize images in all three folders
+    # Loop through each folder and resize the images
     for folder in ['train', 'val', 'test']:
-        input_dir = os.path.join(input_directory_path_base, folder, 'images')
-        output_dir = os.path.join(output_directory_path_base, folder, 'images')
+        input_dir = os.path.join(args.input_dir_base, folder, 'images')
+        output_dir = os.path.join(args.output_dir_base, folder, 'images')
 
         # Resize the images
-        resize_images(input_dir, output_dir, max_width, max_height)
+        resize_images(input_dir, output_dir, args.max_width, args.max_height)

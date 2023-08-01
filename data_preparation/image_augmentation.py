@@ -4,7 +4,7 @@ import pandas as pd
 from imgaug import augmenters, BoundingBox, BoundingBoxesOnImage
 import os
 from tqdm import tqdm
-from convert_yolo import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
+from yolo_utils import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
 
 
 
@@ -85,17 +85,25 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
             # save_yolo_file(os.path.join(dir_aug_annot, txt), boxes)
 
 
+import argparse
+
 if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Augment Images")
 
-    # Input directory path. Should contain a folder images and labels
-    input_dir = '/Users/louis.skowronek/AISS/aiss_images/train'
+    parser.add_argument("--input_dir", default="/Users/louis.skowronek/AISS/aiss_images/train",
+                        help="Input directory path. Should contain a folder images and labels")
+    parser.add_argument("--output_dir", default=None,
+                        help="Output directory path. If None, it will be the same as input_dir_base")
+    parser.add_argument("--nr_of_augs", type=int, default=10,
+                        help="Number of augmented images per image")
 
-    # Output directory path
-    output_dir = '/Users/louis.skowronek/AISS/aiss_images/train'
+    args = parser.parse_args()
 
-    # Number of augmented images per image
-    nr_of_augs = 10
+    # If no output directory is provided, use the input directory as the output directory
+    if args.output_dir is None:
+        args.output_dir = args.input_dir
 
-    image_augmentation(input_dir, output_dir, nr_of_augs)
 
-    # verbesserung: bboxes nicht direkt wegwerfen, wenn es diese nicht vollends im Bild ist
+    # Call function with command-line arguments
+    image_augmentation(args.input_dir, args.output_dir, args.nr_of_augs)

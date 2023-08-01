@@ -1,10 +1,10 @@
 import cv2
 import os
-from convert_yolo import read_yolo_file, convert_yolo_to_bbf
+from yolo_utils import read_yolo_file, convert_yolo_to_bbf
 from PIL import Image, ImageDraw
 
 
-def check_images(dir_images, dir_annot, image_number=0, filename=None, replace=False, rotation_direction=0, width=4, show_image=False):
+def display_bb(dir_images, dir_annot, image_number=0, filename=None, replace=False, rotation_direction=0, width=4, show_image=False):
 
     image_extensions = [".jpg", ".jpeg", ".png", ".gif"]
     image_files = [file for file in os.listdir(dir_images) if os.path.isfile(os.path.join(dir_images, file)) and any(file.lower().endswith(ext) for ext in image_extensions)]
