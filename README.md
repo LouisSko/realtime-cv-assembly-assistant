@@ -26,10 +26,12 @@ You only need to perform these steps once to set up the project.
 
 3. **Navigate into the `object-detection-project/downloads` directory and download the correct version of onnxruntime-gpu.**
    
-   More details on other versions can be found [here](https://elinux.org/Jetson_Zoo#ONNX_Runtime).
+   For Jetpack 4.6.1, use this version. More details on other versions can be found [here](https://elinux.org/Jetson_Zoo#ONNX_Runtime).
 
     ```
     cd path/to/object-detection-project/downloads
+    ```
+    ```
     wget https://nvidia.box.com/shared/static/jy7nqva7l88mq9i8bw3g3sklzf4kccn2.whl -O onnxruntime_gpu-1.10.0-cp36-cp36m-linux_aarch64.whl
     ```
 
@@ -42,14 +44,25 @@ Perform these steps every time you want to run the application.
 
     ```
     cd path/to/object-detection-project/
+    ```
+    ```
     docker/run.sh
     ```
    
-   in case permission is denied, run:
+   If you encounter the error message `bash: docker/run.sh: command not found`, 
+   you may need to modify the permissions of the script to make it executable. Run the following commands:
+
+   ```
+   chmod +x docker/run.sh
+   docker/run.sh
+   ```
+
+   If you see a `Permission denied` error, try running the script with `sudo`:
    
    ```
    sudo docker/run.sh
    ```
+   
 
 2. **Install onnxruntime-gpu.** 
 
@@ -75,26 +88,59 @@ Perform these steps every time you want to run the application.
    
    ```
    cd inference/
-   python app.py --use_camera_stream
+   ```
+   ```
+   python3 app.py --use_camera_stream
    ```
    
    To run the script with all parameters:
 
    ```
-   cd inference/
-   python script.py --model_path /path/to/model --video_source /path/to/video --use_camera_stream --skip_frames 5
+   python3 app.py --model_path /path/to/model --video_source /path/to/video --use_camera_stream --skip_frames 5
    ```
 
 
 Please make sure to follow these steps in the given order. 
 
 
-# Automated Image Generation Pipeline
+
+## Enhancing Inference Performance on Jetson Nano Developer Kit
+
+To optimize the performance of the inference on the Jetson Nano Developer Kit, we can switch to a lightweight desktop environment. This reduces memory usage substantially - in our case from 2 GB to approximately 500 MB. 
+
+Follow these steps to switch to the Lightweight X11 Desktop Environment (LXDE):
+
+1. **Select LXDE as a desktop environment.**
+
+    Instead of using the default "Unity" desktop environment, we will use the LXDE, which is more lightweight and uses less system resources.
+
+2. **Switch GNOME display manager (gdm3) to lightdm.**
+
+    The `lightdm` display manager is more lightweight and uses less system resources than `gdm3`. Switch to it by entering the following command in your terminal:
+
+    ```
+    sudo dpkg-reconfigure lightdm
+    ```
+
+3. **Reboot the Jetson Nano.**
+
+    After changing your desktop environment and display manager, reboot your Jetson Nano to apply these changes.
+
+For more information and detailed instructions, check out this tutorial: [Save 1GB of Memory – Use LXDE on your Jetson](https://jetsonhacks.com/2020/11/07/save-1gb-of-memory-use-lxde-on-your-jetson/).
+
+
+
+# Data Gathering and Training
+
+Following scripts are not supposed to be executed on the Jetson Nano.
+
+
+## Automated Image Generation Pipeline
 
 The script image_generation.py processes a video file and uses a trained YOLOv8 model for object detection on each frame. The detected objects are then annotated in the images, and the YOLO-formatted annotations are converted to VOC format. This is useful for generating annotated image datasets from video footage.
 
 
-## Usage
+### Usage
 
 The script can be run from the command line and takes four optional arguments:
 
@@ -131,12 +177,12 @@ To run the script with all arguments specified:
 python split_dataset.py --input_dir /path/to/input --output_dir /path/to/output --split_ratio 0.8,0.1,0.1
 ```
 
-# Image Augmentation
+## Image Augmentation
 
 This script augments images from a provided directory and stores the augmented images in a specified output directory.
 Note: Using ultralytics to train a YOLOV8 has a built in image augmentation function
 
-## Usage
+### Usage
 
 The script can be run from the command line and takes three optional arguments:
 
@@ -150,7 +196,7 @@ To run the script with all arguments specified:
 python image_augmentation.py --input_dir /path/to/input --output_dir /path/to/output --nr_of_augs 5
 ```
 
-# Image Resizing
+## Image Resizing
 
 This script is used to resize images in directories. It takes as input the base directory which contains subdirectories ('train', 'val', 'test') and each subdirectory should have an 'images' folder with the images to be resized.
 
@@ -167,6 +213,8 @@ To run the script with all arguments specified:
 python resize_images.py --input_dir_base /path/to/input/base --output_dir_base /path/to/output/base --max_width 1280 --max_height 720
 ```
 
+
+
 # Unit tests
 
 unit tests are provided to test basic functionality of the http requests.
@@ -176,3 +224,4 @@ run tests using:
 ```
 pytest --cov-report term --cov=inference tests/
 ```
+
