@@ -11,20 +11,22 @@ import requests
 from onnx_yolov8.YOLOv8 import YOLOv8
 from onnx_yolov8.utils import MotionDetector, get_labels_steps
 
+# Determine the path to the file dynamically, based on the location of the currently-running script: -> necessary for loading model
+current_dir = os.path.dirname(os.path.realpath(__file__))
+
 
 # Start of Flask application definition
 app = Flask(__name__, static_folder='resources')
 
 # Configurations for the video capture method
 # Define whether to use gstreamer pipeline or video
-cap = cv2.VideoCapture('../videos/IMG_4594.MOV')
-# Uncomment below line to use gstreamer pipeline
-# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+video_path = os.path.join(current_dir, '../videos/IMG_4594.MOV')
+cap = cv2.VideoCapture(video_path)
+# cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER) # Uncomment line to use gstreamer pipeline
 
 # Configurations for the YOLOv8 model
-# Path to the model
-model_path = '../models/yolov8s_best.onnx'
 # Initialize the YOLOv8 model with given configurations
+model_path = os.path.join(current_dir, '../models/yolov8s_best.onnx')
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 
 # Configurations for the Motion Detector
