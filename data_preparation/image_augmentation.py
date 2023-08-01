@@ -1,11 +1,9 @@
 import cv2
-import numpy as np
-import pandas as pd
-from imgaug import augmenters, BoundingBox, BoundingBoxesOnImage
+from imgaug import augmenters, BoundingBoxesOnImage
 import os
 from tqdm import tqdm
 from yolo_utils import read_yolo_file, convert_yolo_to_bbf, convert_bbf_to_yolo, save_yolo_file
-
+import argparse
 
 
 def image_augmentation(input_dir, output_dir, nr_of_augs=5):
@@ -84,8 +82,6 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
             # original_image.save(os.path.join(dir_aug_images, img))
             # save_yolo_file(os.path.join(dir_aug_annot, txt), boxes)
 
-
-import argparse
 
 if __name__ == "__main__":
     # Set up argument parser
