@@ -150,3 +150,13 @@ To run the script with all arguments specified:
 ```
 python resize_images.py --input_dir_base /path/to/input/base --output_dir_base /path/to/output/base --max_width 1280 --max_height 720
 ```
+
+# Unit tests
+
+unit tests are provided to test basic functionality of the http requests.
+
+run tests using:
+
+```
+pytest --cov-report term --cov=inference tests/
+```
