@@ -57,15 +57,36 @@ Perform these steps every time you want to run the application.
     pip3 install downloads/onnxruntime_gpu-1.10.0-cp36-cp36m-linux_aarch64.whl
     ```
 
-3. **Run the application.** 
+3. **Run the Object Detection Script.** 
 
-    ```
-    cd inference/
-    python3 inference/app.py
-    ```
+   
+   This script processes a video file or a camera stream using a specified model
+   It can be run from the command line and accepts the following optional arguments:
+   
+   1. `--model_path`: Path to the model file. Default is '../models/yolov8s_best.onnx'.
+   
+   2. `--video_source`: Path to the video file to be processed. Default is '../videos/IMG_4594.MOV'.
+   
+   3. `--use_camera_stream`: This is a flag. If specified, the script uses the camera stream from the Nano. There is no need to provide a value, just include the argument if you want to use the camera stream.
+   
+   4. `--skip_frames`: Perform detections and send information only every n frames. Default is 5. Latency <-> Performance Trade-Off
+   
+   To run the script with all defaults, and run it on the camera stream
+   
+   ```
+   cd inference/
+   python app.py --use_camera_stream
+   ```
+   
+   To run the script with all parameters:
+
+   ```
+   cd inference/
+   python script.py --model_path /path/to/model --video_source /path/to/video --use_camera_stream --skip_frames 5
+   ```
+
 
 Please make sure to follow these steps in the given order. 
-
 
 
 # Automated Image Generation Pipeline
