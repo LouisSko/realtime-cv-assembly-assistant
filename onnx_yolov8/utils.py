@@ -234,8 +234,8 @@ def get_labels_steps():
         4: [10, 10, 13],
         5: [11, 11, 12],
         6: [1],
-        7: [6],
-        8: [7, 7],
+        7: [7, 7],
+        8: [6],
         9: [16],
         10: [14],
         11: [2],
@@ -255,8 +255,8 @@ def get_labels_steps():
     #    4: [labels[10], labels[10], labels[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
     #    5: [labels[11], labels[11], labels[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
     #    6: [labels[1]],                                   # [grey_axle_long_stop]
-    #    7: [labels[6]],                                   # [black_beam]
-    #    8: [labels[7], labels[7]],                        # [black_pin_short, black_pin_short]
+    #    7: [labels[7], labels[7]]                         # [black_pin_short, black_pin_short]
+    #    8: [labels[6]],                                   # [black_beam]
     #    9: [labels[16]],                                  # [wheel]
     #    10: [labels[14]],                                 # [white_tooth]
     #    11: [labels[2]],                                  # [grey_axle_short_stop]
