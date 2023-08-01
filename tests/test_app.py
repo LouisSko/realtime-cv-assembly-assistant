@@ -1,5 +1,6 @@
 import pytest
-from app import app, LABELS, STEPS, STEPS_NO
+from app import app, LABELS, STEPS
+
 
 # Create a test client for the app
 @pytest.fixture

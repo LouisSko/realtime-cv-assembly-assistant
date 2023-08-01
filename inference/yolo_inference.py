@@ -45,7 +45,7 @@ def gstreamer_pipeline(
         )
     )
 
-model_path = 'models/yolov8n_best.onnx'
+model_path = '../models/yolov8n_best.onnx'
 yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)
 motion_detector = MotionDetector(threshold=20, th_diff=0.01, skip_frames=10)
 

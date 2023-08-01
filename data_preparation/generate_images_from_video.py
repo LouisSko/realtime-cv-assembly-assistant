@@ -1,7 +1,6 @@
 import cv2
 import os
 
-
 def generate_images_from_video(dir_video, file, dir_save=None, frames_per_second=1):
 
     if dir_save is None:
