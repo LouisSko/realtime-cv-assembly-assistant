@@ -1,25 +1,21 @@
 from ultralytics import YOLO
 import cv2
-from remove_exif import remove_exif
-from convert_imagefiles import convert_image_to_jpeg
 import os
 import numpy as np
-from convert_yolo import save_yolo_file
-from check_bb_for_images import check_images
+from yolo_utils import save_yolo_file
 
 
-def annotate_images(model, dir_images, dir_annot_files):
-
+def annotate_images(model, dir_images, dir_labels):
     # make label directory if necessary
-    if not os.path.exists(dir_annot_files):
+    if not os.path.exists(dir_labels):
         print('Directory for labels does not exist')
-        os.makedirs(dir_annot_files)
+        os.makedirs(dir_labels)
         print('Created directory for labels')
 
     # read in files
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".heic"]
     images_files = [file for file in os.listdir(dir_images) if os.path.isfile(os.path.join(dir_images, file)) and any(
-    file.lower().endswith(ext) for ext in image_extensions)]
+        file.lower().endswith(ext) for ext in image_extensions)]
 
     # get annotations
     for file in images_files:
@@ -31,7 +27,7 @@ def annotate_images(model, dir_images, dir_annot_files):
         yolo_boxes = []
 
         nr_boxes = len(results[0].boxes.cls)
-        for i in range(0,nr_boxes):
+        for i in range(0, nr_boxes):
             class_id = results[0].boxes.cls[i]
             x_min_rel, y_min_rel, x_max_rel, y_max_rel = results[0].boxes.xyxyn[i]
             width = x_max_rel - x_min_rel
@@ -39,10 +35,11 @@ def annotate_images(model, dir_images, dir_annot_files):
             x_center = x_min_rel + (width / 2)
             y_center = y_min_rel + (height / 2)
             yolo_boxes.append(
-                        [int(class_id.item()), np.round(x_center.item(), 6), np.round(y_center.item(), 6), np.round(width.item(), 6), np.round(height.item(), 6)])
+                [int(class_id.item()), np.round(x_center.item(), 6), np.round(y_center.item(), 6),
+                 np.round(width.item(), 6), np.round(height.item(), 6)])
 
         annot_file = file.split('.')[0] + '.txt'
-        annot_file_path = os.path.join(dir_annot_files, annot_file)
+        annot_file_path = os.path.join(dir_labels, annot_file)
         save_yolo_file(annot_file_path, yolo_boxes)
 
 
