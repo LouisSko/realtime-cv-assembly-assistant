@@ -4,6 +4,7 @@
 
 This README provides instructions for the initial setup of the Object Detection Project and its regular use. 
 It is aimed to be used with a jetson-nano developer kit running on SDK 4.6.1. However, it can be adapted to be compatible with other SDK Versions as well.
+
 ## Initial Setup
 
 You only need to perform these steps once to set up the project.
@@ -69,3 +70,83 @@ Perform these steps every time you want to run the application.
     ```
 
 Please make sure to follow these steps in the given order. 
+
+
+
+# Automated Image Generation Pipeline
+
+The script image_generation.py processes a video file and uses a trained YOLOv8 model for object detection on each frame. The detected objects are then annotated in the images, and the YOLO-formatted annotations are converted to VOC format. This is useful for generating annotated image datasets from video footage.
+
+
+## Usage
+
+The script can be run from the command line and takes four optional arguments:
+
+1. `--path_video`: The path to the video file to process. Default is `/Users/louis.skowronek/object-detection-project/videos/black_axle_and_black_beam.mp4`.
+2. `--save_dir`: The directory where the processed images and labels will be saved. Default is `/Users/louis.skowronek/AISS/test_files`.
+3. `--yolo_classes`: The path to the .txt file containing the classes for the YOLO model. Default is `/Users/louis.skowronek/object-detection-project/onnx_yolov8/classes.txt`.
+4. `--model_path`: The path to the trained YOLO model. Default is `../models/yolov8s_best.pt`.
+
+To run the script with all paths specified:
+
+```
+python image_generation.py --path_video /path/to/video --save_dir /path/to/save/dir --yolo_classes /path/to/yolo/classes --model_path /path/to/model
+```
+
+
+
+## Splitting the Dataset into Train, Test, and Validation Sets
+
+The Python script `split_dataset.py` allows you to split a dataset into training, testing, and validation sets according to a specified ratio. The dataset should contain 'images' and 'labels' folders.
+
+### Usage
+
+The script can be run from the command line and takes three optional arguments:
+
+1. `--input_dir`: Specifies the path to the directory containing the dataset. The script expects this directory to contain 'images' and 'labels' folders. Default is `/Users/louis.skowronek/AISS/generate_images`.
+
+2. `--output_dir`: Specifies the path to the output directory where the split datasets (training, testing, validation) will be saved. If this argument is not specified, the input directory will be used as the output directory. Default is the same as `--input_dir`.
+
+3. `--split_ratio`: Specifies a tuple of three values representing the proportion of data to be used for training, testing, and validation, respectively. The values should add up to 1. Default is `0.8,0.1,0.1` (representing 80% training, 10% testing, and 10% validation)
+
+To run the script with all arguments specified:
+
+```
+python split_dataset.py --input_dir /path/to/input --output_dir /path/to/output --split_ratio 0.8,0.1,0.1
+```
+
+# Image Augmentation
+
+This script augments images from a provided directory and stores the augmented images in a specified output directory.
+Note: Using ultralytics to train a YOLOV8 has a built in image augmentation function
+
+## Usage
+
+The script can be run from the command line and takes three optional arguments:
+
+1. `--input_dir`: The directory containing the images to be augmented. Default is `/Users/louis.skowronek/AISS/aiss_images/train`.
+2. `--output_dir`: The directory where the augmented images will be saved.  If this argument is not provided, the script will use the input directory as the output directory.
+3. `--nr_of_augs`: The number of augmented images to be generated per original image. Default is 10.
+
+To run the script with all arguments specified:
+
+```
+python image_augmentation.py --input_dir /path/to/input --output_dir /path/to/output --nr_of_augs 5
+```
+
+# Image Resizing
+
+This script is used to resize images in directories. It takes as input the base directory which contains subdirectories ('train', 'val', 'test') and each subdirectory should have an 'images' folder with the images to be resized.
+
+The script can be run from the command line with the following arguments:
+
+1. `--input_dir_base` : The base input directory path. This directory should contain subdirectories ('train', 'val', 'test') and each subdirectory should have an 'images' folder with images to be resized. Default is `/Users/louis.skowronek/AISS/generate_images/yolo_images.
+2. `--output_dir_base` : The base output directory path. If this argument is not provided, the script will use the input directory as the output directory.
+3. `--max_width` : The maximum width for the resized images. Default is 1280.
+4. `--max_height` : The maximum height for the resized images. Default is 720.
+
+To run the script with all arguments specified:
+
+```
+python resize_images.py --input_dir_base /path/to/input/base --output_dir_base /path/to/output/base --max_width 1280 --max_height 720
+```
