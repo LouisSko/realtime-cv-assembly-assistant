@@ -55,9 +55,6 @@ die() {
     exit 1
 }
 
-# paths to some project directories
-
-
 # where the project will reside inside the Docker container
 DOCKER_ROOT="/jetson-inference"  
 
@@ -65,7 +62,7 @@ DOCKER_ROOT="/jetson-inference"
 DATA_VOLUME="--volume $PWD/inference:/$DOCKER_ROOT/inference \
 	     --volume $PWD/models:/$DOCKER_ROOT/models \
 	     --volume $PWD/downloads:/$DOCKER_ROOT/downloads \
-             --volume $PWD/onnx_yolov8:/$DOCKER_ROOT/onnx_yolov8 \
+       --volume $PWD/onnx_yolov8:/$DOCKER_ROOT/onnx_yolov8 \
 " 
 
 # parse user arguments
