@@ -55,7 +55,7 @@ Perform these steps every time you want to run the application.
 3. **Run the Object Detection Script.** 
 
    ```
-   python3 app.py --model_path /path/to/model --use_camera_stream --skip_frames 5
+   python3 inference/app.py --model_path /path/to/model --use_camera_stream --skip_frames 5
    ```
 
 
