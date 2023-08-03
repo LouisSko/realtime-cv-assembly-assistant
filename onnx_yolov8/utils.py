@@ -82,60 +82,99 @@ def draw_detections(image, boxes, scores, class_ids, required_class_ids=None, ma
     size = min([img_height, img_width]) * 0.0005
     text_thickness = int(min([img_height, img_width]) * 0.001)
 
-    # Draw bounding boxes and labels of detections
+    # Group detections by class_id and initialize a dictionary to keep track of counts
+    detections_by_class = {}
+    part_counts = {}
     for box, score, class_id in zip(boxes, scores, class_ids):
+        if class_id not in detections_by_class:
+            detections_by_class[class_id] = []
+            part_counts[class_id] = 0
+        detections_by_class[class_id].append((box, score))
+
+    # Draw bounding boxes and labels of detections
+    for class_id, detections in detections_by_class.items():
         label = class_names[class_id]
 
         # Check if every part is displayed or only required ones
         if (required_class_ids is not None and label in required_class_ids) or (required_class_ids is None) or (displayAll is True):
-            x1, y1, x2, y2 = box.astype(int)
 
-            # Settings
-            if multi_color == False:
-                if displayAll is True and required_class_ids is not None and label not in required_class_ids:
-                     # Set color
-                    color = (179, 179, 179)
+            if len(detections) > 1:
+                # Sort detections by confidence in descending order
+                detections.sort(key=lambda x: x[1], reverse=True)
+
+            for detection in detections:
+                box, score = detection
+                x1, y1, x2, y2 = box.astype(int)
+
+                # Settings
+                if multi_color == False:
+                    if displayAll is True and required_class_ids is not None and label not in required_class_ids:
+                         # Set color
+                        color = (179, 179, 179)
+                    else:
+                        # Set color
+                        color = (102, 102, 255)
+                    
+                    # Draw rectangle
+                    if label in required_class_ids and part_counts[class_id] >= required_class_ids.count(label):
+                        # Skip drawing if the required count is exceeded
+                        continue
+                    cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
+                    # Draw fill rectangle in mask image
+                    cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
                 else:
                     # Set color
-                    color = (102, 102, 255)
+                    color = colors[class_id]
+                    # Draw rectangle
+                    if label in required_class_ids and part_counts[class_id] >= required_class_ids.count(label):
+                        # Skip drawing if the required count is exceeded
+                        continue
+                    cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
+                    # Draw fill rectangle in mask image
+                    cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
                 
-                # Draw rectangle
-                cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
-                # Draw fill rectangle in mask image
-                cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
-            else:
-                # Set color
-                color = colors[class_id]
-                # Draw rectangle
-                cv2.rectangle(det_img, (x1, y1), (x2, y2), color, 2)
-                # Draw fill rectangle in mask image
-                cv2.rectangle(mask_img, (x1, y1), (x2, y2), color, -1)
-            
-            # Labels based on settings
-            if displayConfidence == True and displayLabel == True:
-                caption = f'{label} {int(score * 100)}%'
-            elif  displayLabel == True and displayConfidence == False:
-                caption = f'{label}'
-            elif displayConfidence == True and displayLabel == False:
-                caption = f'Required piece: {int(score * 100)}%'
-            else:
-                caption = "Required piece"
+                # Labels based on settings
+                if displayConfidence == True and displayLabel == True:
+                    caption = f'{label} {int(score * 100)}%'
+                elif  displayLabel == True and displayConfidence == False:
+                    caption = f'{label}'
+                elif displayConfidence == True and displayLabel == False:
+                    caption = f'Required piece: {int(score * 100)}%'
+                else:
+                    caption = "Required piece"
 
-            (tw, th), _ = cv2.getTextSize(text=caption, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                                        fontScale=size, thickness=text_thickness)
-            th = int(th * 1.2)
+                if len(detections) > 1:
+                    # Get the required count of the part
+                    required_count = required_class_ids.count(label) if required_class_ids is not None else 0
 
-            cv2.rectangle(det_img, (x1, y1),
-                        (x1 + tw, y1 - th), color, -1)
-            cv2.rectangle(mask_img, (x1, y1),
-                        (x1 + tw, y1 - th), color, -1)
-            cv2.putText(det_img, caption, (x1, y1),
-                        cv2.FONT_HERSHEY_SIMPLEX, size, (255, 255, 255), text_thickness, cv2.LINE_AA)
+                    # Append part count to caption for multiple detections of the same part
+                    part_count = part_counts[class_id] + 1
+                    part_counts[class_id] = part_count
 
-            cv2.putText(mask_img, caption, (x1, y1),
-                        cv2.FONT_HERSHEY_SIMPLEX, size, (255, 255, 255), text_thickness, cv2.LINE_AA)
+                    # Check if the part count exceeds the required count, and skip drawing if it does
+                    if part_count > required_count:
+                        continue
+
+                    caption += f' #{part_count}'
+
+                (tw, th), _ = cv2.getTextSize(text=caption, fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                                            fontScale=size, thickness=text_thickness)
+                th = int(th * 1.2)
+
+                cv2.rectangle(det_img, (x1, y1),
+                            (x1 + tw, y1 - th), color, -1)
+                cv2.rectangle(mask_img, (x1, y1),
+                            (x1 + tw, y1 - th), color, -1)
+                cv2.putText(det_img, caption, (x1, y1),
+                            cv2.FONT_HERSHEY_SIMPLEX, size, (255, 255, 255), text_thickness, cv2.LINE_AA)
+
+                cv2.putText(mask_img, caption, (x1, y1),
+                            cv2.FONT_HERSHEY_SIMPLEX, size, (255, 255, 255), text_thickness, cv2.LINE_AA)
 
     return cv2.addWeighted(mask_img, mask_alpha, det_img, 1 - mask_alpha, 0)
+
+
+
 
 
 class MotionDetector:
