@@ -243,8 +243,8 @@ def get_labels_steps():
         10: [14],
         11: [2],
         12: [9, 9],
-        13: [5, 7, 11, 11],
-        14: [5, 7, 11, 11],
+        13: [5, 7],
+        14: [11, 11],
         15: [17]
     }
 
@@ -264,8 +264,8 @@ def get_labels_steps():
     #    10: [labels[14]],                                 # [white_tooth]
     #    11: [labels[2]],                                  # [grey_axle_short_stop]
     #    12: [labels[9], labels[9]],                       # [red_pin_3L, red_pin_3L]
-    #    13: [labels[11], labels[11], labels[5], labels[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
-    #    14: [labels[11], labels[11], labels[5], labels[7]],# [blue_axle_pin, blue_axle_pin, black_axle_pin_con, black_pin_short]
+    #    13: [labels[5], labels[7]],                       # [black_axle_pin_con, black_pin_short]
+    #    14: [labels[11], labels[11]],                     # [blue_axle_pin, blue_axle_pin]
     #    15: [labels[17]]                                  # [wire]
     #}
 
