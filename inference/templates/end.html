@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Flex container for top section */
+        .top-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            width: 100%;
+            background-color: #f0f0f0;
+        }
+
+        /* Image on the left */
+        .left-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            /* Add any additional styles for the left image */
+        }
+
+        /* Title in the center */
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Image on the right */
+        .right-image {
+            width: 100px;
+            border-radius: 8px;
+        }
+
+        /* CSS styles for the layout */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #ccc;
+            margin: 20px 0;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .image {
+            width: 100px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .instruction-image {
+            width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .assembly-button {
+            color: #009682;
+        }
+
+        .disassembly-button {
+            color: #C91A09;
+        }
+
+        .go-button {
+            color: #fff;
+            background-color: #333;
+        }
+
+        .button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .mode-selection .assembly-button.selected {
+            background-color: #009682;
+            color: #fff;
+        }
+
+        .mode-selection .disassembly-button.selected {
+            background-color: #C91A09;
+            color: #fff;
+        }
+
+        .paragraph {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .mode-selection {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .names-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .names-container p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="names-container">
+            <p>Constantin Hannes Ernstberger</p>
+            <p>Julian Sauer</p>
+            <p>Marcel Früholz</p>
+            <p>Louis Skowronek</p>
+            <p>Alexander Rothmaier</p>
+        </div>
+        <div class="top-section">
+            <img src="resources/lego.png" alt="Left Image" class="left-image">
+            <h1 class="title">LEGO Mindstorm: Real-Time Instruction Manual</h1>
+            <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
+        </div>
+        <div class="paragraph">
+            <p>Congratulations!</p>
+        </div>
+        <div class="paragraph">
+            <p>You have successfully completed the LEGO Mindstorm building adventure using our Real-Time Instruction Manual web app. We hope you enjoyed the experience and found it both informative and fun!</p>
+        </div>
+        <div class="paragraph">
+            <p>Whether you assembled a magnificent structure or carefully disassembled the set, we're thrilled that you chose to use our intelligent camera-powered platform to enhance your LEGO journey.</p>
+        </div>
+        <div class="paragraph">
+            <p>We're always looking to improve, so if you have any feedback or suggestions for us, please don't hesitate to reach out. Your input is invaluable in making this web app even better.</p>
+        </div>
+        <div class="paragraph">
+            <p>Thank you for using the LEGO Piece Identification and Assembly Web App. We hope to see you again soon!</p>
+        </div>
+
+        <!-- Go back to initial page button -->
+        <div class="buttons">
+            <a href="/" class="button go-button">Back to Home</a>
+        </div>
+    </div>
+    <script>
+        // JavaScript code if any functionality needed
+    </script>
+</body>
+</html>

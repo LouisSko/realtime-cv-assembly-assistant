@@ -312,13 +312,27 @@
             // Add functionality to Next button
             nextButton.addEventListener('click', () => {
                 fetch('/next', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        updateUI(data.step, data.pieces);
-                        updateLabeling("");
-                        sendPieces(data.pieces);
+                    .then(response => {
+                        // Check if the response is JSON or HTML
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            // If it's a JSON response, parse it and update the UI
+                            return response.json().then(data => {
+                                updateUI(data.step, data.pieces);
+                                updateLabeling("");
+                                sendPieces(data.pieces);
+                            });
+                        } else {
+                            // If it's an HTML template, redirect to the end page
+                            window.location.href = '/end';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error handling Next button:', error);
+                        // Handle error, if necessary
                     });
             });
+
 
             // Add functionality to Check button
             checkButton.addEventListener('click', () => {

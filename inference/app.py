@@ -237,6 +237,10 @@ def live():
         return render_template('liveInstructionsDisassembly.html',
                                instruction_image=instruction_image,
                                step=current_step, pieces=STEPS[current_step])
+    
+@app.route('/end')
+def end():
+    return render_template('end.html')
 
 
 # Go to next instruction step
@@ -249,7 +253,7 @@ def next_step():
 
     # Check if we have reached the maximum step
     if current_step > 15:
-        current_step = 15
+        return render_template('end.html')
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
@@ -264,7 +268,7 @@ def previous_step():
 
     # Check if we have reached the minimum step
     if current_step < 1:
-        current_step = 1
+        return render_template('end.html')
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
