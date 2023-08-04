@@ -3,7 +3,7 @@
 # Object Detection Project Setup and Use Instructions
 
 This README provides instructions for the initial setup of the Object Detection Project and its regular use. 
-It is aimed to be used with a jetson-nano developer kit running on SDK 4.6.1. However, due to the implementation choices, it can be easily adapted to be compatible with other SDK Versions as well.
+It is aimed to be used with a jetson-nano developer kit running on SDK [4.6.1](https://developer.nvidia.com/embedded/jetpack-sdk-461). However, due to the implementation choices, it can be easily adapted to be compatible with other SDK Versions as well.
 Simply use a compatible pre-built Jetson-Inference docker image and download the compatible onnxruntime-gpu version.
 
 ## Initial Setup
@@ -76,7 +76,7 @@ Perform these steps every time you want to run the application.
    This script processes a video file or a camera stream using a specified model
    It can be run from the command line and accepts the following optional arguments:
    
-   1. `--model_path`: Path to the model file. Default is '../models/yolov8s_best.onnx'.
+   1. `--model_name`: Name of the model as .onnx file. It should be available in the models directory. Default is 'yolov8s_best.onnx'.
    
    2. `--video_source`: Path to the video file to be processed. Default is '../videos/IMG_4594.MOV'.
    
