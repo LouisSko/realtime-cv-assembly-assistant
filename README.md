@@ -96,7 +96,7 @@ Perform these steps every time you want to run the application.
    To run the script with all parameters:
 
    ```
-   python3 app.py --model_name your_model.onnx --video_source /path/to/video --use_camera_stream --skip_frames 5
+   python3 app.py --model_path /path/to/model --video_source /path/to/video --use_camera_stream --skip_frames 5
    ```
 
 
