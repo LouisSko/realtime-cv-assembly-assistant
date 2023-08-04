@@ -16,14 +16,14 @@ import argparse
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='Process a video file or gstreamer pipeline with a specified model.')
-parser.add_argument('--model_name', type=str, default='yolov8s_best.onnx',
-                    help='Name of the model as .onnx. It should be placed in the models directory.')
+parser.add_argument('--model_path', type=str, default='../models/yolov8s_best.onnx',
+                    help='Path to the model file.')
 parser.add_argument('--video_source', type=str, default='../videos/blue_pin_long.mp4',
                     help='Path to the video file to be processed.')
 parser.add_argument('--use_camera_stream', action='store_true',  # if the command line argument is specified, then argparse will assign the value True
                     help='Use this flag if the camera stream of the nano should be used.')
 parser.add_argument('--skip_frames', type=int, default=5,
-                    help='Make detections and send information only every n frames.')
+                    help='Make detections and send information only every n frames')
 
 args = parser.parse_args()
 
@@ -44,7 +44,7 @@ detection_results = []
 necessary_pieces = []
 
 
-def capture_camera(model_name, video_source, use_camera_stream, skip_frames):
+def capture_camera(model_path, video_source, use_camera_stream, skip_frames):
     """
     This function is responsible for capturing frames from the camera,
     performing object detection, and returning the detection results.
@@ -52,13 +52,11 @@ def capture_camera(model_name, video_source, use_camera_stream, skip_frames):
 
     if use_camera_stream:
         # Configurations for the video capture method using gstreamer pipeline
-        cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2, ), cv2.CAP_GSTREAMER)
+        cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
     else:
         # Configurations for the video capture method using a video file
         video_path = os.path.join(current_dir, video_source)
         cap = cv2.VideoCapture(video_path)
-
-    model_path = os.path.join(current_dir, '../models/', model_name)
 
     # Initialize the YOLOv8 model with given configurations
     yolov8_detector = YOLOv8(model_path, conf_thres=0.5, iou_thres=0.5)

@@ -24,7 +24,7 @@ class YOLOv8:
         self.iou_threshold = iou_thres
         self.motion_prev = True
 
-        # Settings
+        #Settings
         self.multi_color = False
         self.displayAll = False
         self.displayConfidence = False
@@ -32,6 +32,7 @@ class YOLOv8:
 
         # Initialize model
         self.initialize_model(path)
+
 
     def initialize_model(self, path):
         self.session = onnxruntime.InferenceSession(path,
@@ -56,9 +57,6 @@ class YOLOv8:
         return self.boxes, self.scores, self.class_ids
 
     def prepare_input(self, image):
-
-        # input image [1280, 720, 3]
-
         self.img_height, self.img_width = image.shape[:2]
 
         input_img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -71,7 +69,8 @@ class YOLOv8:
         input_img = input_img.transpose(2, 0, 1)
         input_tensor = input_img[np.newaxis, :, :, :].astype(np.float32)
 
-        return input_tensor  # [1, 3, 640, 640]
+        return input_tensor
+
 
     def inference(self, input_tensor):
         start = time.perf_counter()
@@ -128,7 +127,7 @@ class YOLOv8:
         if confidence != "":
             # Convert to '%' if higher than 1
             if float(confidence) > 1:
-                self.conf_threshold = float(confidence) / 100
+                self.conf_threshold = float(confidence)/100
             elif float(confidence) < 0.2:
                 self.conf_threshold = 0.2
             else:
@@ -138,15 +137,15 @@ class YOLOv8:
             self.multi_color = True
         if coloring == "single-color":
             self.multi_color = False
-
+    
         self.displayAll = displayAll
         self.displayConfidence = displayConfidence
         self.displayLabel = displayLabel
 
-    def draw_detections(self, image, required_class_ids=None, draw_scores=True, mask_alpha=0.2):
+    def draw_detections(self, image, required_class_ids = None, draw_scores=True, mask_alpha=0.2):
 
-        return draw_detections(image, self.boxes, self.scores, self.class_ids, required_class_ids, mask_alpha,
-                               self.multi_color, self.displayAll, self.displayConfidence, self.displayLabel)
+        return draw_detections(image, self.boxes, self.scores, self.class_ids, required_class_ids, mask_alpha, self.multi_color, self.displayAll, self.displayConfidence, self.displayLabel)
+
 
     def get_input_details(self):
         model_inputs = self.session.get_inputs()
@@ -159,3 +158,6 @@ class YOLOv8:
     def get_output_details(self):
         model_outputs = self.session.get_outputs()
         self.output_names = [model_outputs[i].name for i in range(len(model_outputs))]
+
+
+
