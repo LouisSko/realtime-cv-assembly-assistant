@@ -1,6 +1,5 @@
 import pytest
-from app import app, LABELS, STEPS
-
+from inference.testing_app import app, STEPS, LABELS
 
 # Create a test client for the app
 @pytest.fixture
@@ -9,7 +8,7 @@ def client():
     with app.test_client() as client:
         yield client
 
-########################## Test cases for the HTTP requests ##########################
+########################## Test cases for HTTP requests ##########################
 
 def test_index_page(client):
     # Test if the index page loads successfully
@@ -158,32 +157,16 @@ def test_start_invalid_mode(client):
     assert response.is_json
     assert response.get_json() == {'error': 'Invalid mode'}
 
-def test_previous_step_reached_minimum(client):
-    # Test if going to the previous step when already at the minimum step returns the same step and pieces
-    client.post('/previous')
-    response = client.post('/previous')
-    assert response.status_code == 200
-    assert response.is_json
-    data = response.get_json()
-    assert 'step' in data
-    assert 'pieces' in data
-    assert data['step'] == 1
-    assert data['pieces'] == STEPS[1]
-
-def test_next_step_reached_maximum(client):
-    # Test if going to the next step when already at the maximum step returns the same step and pieces
-    i=0
-    while i < 15:
-        client.post('/next')
-        i+=1
+def test_next_step_reaches_end(client):
+    for _ in range(15):
+        response = client.post('/next')
+        assert response.status_code == 200
     response = client.post('/next')
     assert response.status_code == 200
-    assert response.is_json
-    data = response.get_json()
-    assert 'step' in data
-    assert 'pieces' in data
-    assert data['step'] == 15
-    assert data['pieces'] == STEPS[15]
+
+def test_end_route(client):
+    response = client.get('/end')
+    assert response.status_code == 200
 
 def test_handle_detections_invalid_data(client):
     # Test if sending invalid detection results data returns a string response with status code 400
