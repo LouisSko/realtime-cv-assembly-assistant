@@ -1,5 +1,5 @@
 import pytest
-from inference.test_app_only import app, STEPS, LABELS
+from inference.dummy_app import app, STEPS, LABELS
 
 # Create a test client for the app
 @pytest.fixture

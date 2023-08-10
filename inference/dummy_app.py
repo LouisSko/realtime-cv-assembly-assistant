@@ -1,3 +1,6 @@
+################################         DUMMY APP         ################################
+################################ for testing purposes only ################################
+
 from flask import Flask, jsonify, render_template, request
 from onnx_yolov8.utils import get_labels_steps
 
