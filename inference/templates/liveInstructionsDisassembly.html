@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <<style>
-        /* Flex container for top section */
+    <!-- CSS Styles -->
+    <style>
+        /* Styling for various elements */
         .top-section {
             display: flex;
             align-items: center;
@@ -12,15 +13,12 @@
             background-color: #f0f0f0;
         }
 
-        /* Image on the left */
         .left-image {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            /* Add any additional styles for the left image */
         }
 
-        /* Title in the center */
         .title {
             text-align: center;
             font-size: 24px;
@@ -29,13 +27,11 @@
             color: #333;
         }
 
-        /* Image on the right */
         .right-image {
             width: 100px;
             border-radius: 8px;
         }
 
-        /* CSS styles for the layout */
         body {
             margin: 0;
             padding: 0;
@@ -148,7 +144,6 @@
             margin-top: 20px;
         }
 
-        /* Additional styles for net-response-container */
         #net-response-container {
             background-color: #f0f0f0;
             padding: 10px;
@@ -161,7 +156,6 @@
             color: #333;
         }
 
-        /* Additional styles for advanced settings */
         #advanced-settings {
             background-color: #f0f0f0;
             padding: 10px;
@@ -184,7 +178,6 @@
             margin-top: 10px;
         }
 
-        /* Button style for advanced settings */
         .settings-button {
             color: #00bcd4;
             margin-top: 10px;
@@ -206,7 +199,9 @@
     </style>
 </head>
 <body>
+    <!-- Main container for the page content -->
     <div class="container">
+        <!-- Names of the project contributors -->
         <div class="names-container">
             <p>Constantin Hannes Ernstberger</p>
             <p>Julian Sauer</p>
@@ -214,27 +209,37 @@
             <p>Louis Skowronek</p>
             <p>Alexander Rothmaier</p>
         </div>
+        <!-- Top section containing project title and images -->
         <div class="top-section">
+            <!-- Left image and project title -->
             <img src="resources/lego.png" alt="Left Image" class="left-image">
             <h1 class="title">LEGO Mindstorm: Real-Time Instruction Manual</h1>
+            <!-- Right image -->
             <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
         </div>
         <p></p>
+        <!-- Main content area -->
         <div class="row">
+            <!-- Left column with live video feed -->
             <div class="left-column">
                 <img src="{{ url_for('video_feed') }}" alt="Camera Feed" class="live-video">
             </div>
+            <!-- Right column with instruction image and buttons -->
             <div class="right-column">
+                <!-- Instruction image -->
                 <div class="row">
                     <img class="image instructionImg" id="instruction-image" src="{{ instruction_image }}" alt="Instruction Image">
                 </div>
+                <!-- Buttons for navigation and actions -->
                 <div class="row buttons">
                     <button id="next-button" class="button next-button">Previous Step</button>
                     <button id="last-button" class="button last-button">Next Step</button>
                 </div>
+                <!-- Check button to verify detected labels -->
                 <div class="row">
                     <button id="check-button" class="button check-button">Check Labels</button>
                 </div>
+                <!-- Container for displaying network response -->
                 <div class="row">
                     <div id="net-response-container" style="display: none; min-height: 40px;">
                         <div id="net-response-text"></div>
@@ -245,7 +250,9 @@
         <!-- Advanced settings content -->
         <div class="row">
             <div class="settings">
+                <!-- Advanced settings content -->
                 <div id="advanced-settings" style="display: none;">
+                    <!-- Settings options for color, confidence, etc. -->
                     <div class="settings-content">
                         <div>
                             <label for="coloring">Coloring:</label>
@@ -272,6 +279,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Buttons for confirming and toggling settings -->
                 <div class="row buttons">
                     <button id="settings-btn" class="button settings-button" style="display: none;">Confirm</button>
                     <button id="toggle-btn" class="button toggle-button">Advanced Settings</button>
@@ -279,7 +287,9 @@
             </div>
         </div>
     </div>
+    <!-- JavaScript functionality -->
     <script>
+        // When the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', () => {
             // Get the instruction image element
             const instructionImage = document.getElementById('instruction-image');
@@ -298,7 +308,7 @@
             const netResponseText = document.getElementById('net-response-text');
 
             
-             // Add functionality to Next button
+             // Add functionality to Previous button
              lastButton.addEventListener('click', () => {
                 fetch('/previous', { method: 'POST' })
                     .then(response => {

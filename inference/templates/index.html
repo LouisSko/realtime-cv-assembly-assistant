@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- CSS Styles -->
     <style>
-        /* Flex container for top section */
+        /* Styling for various elements */
         .top-section {
             display: flex;
             align-items: center;
@@ -12,15 +13,12 @@
             background-color: #f0f0f0;
         }
 
-        /* Image on the left */
         .left-image {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            /* Add any additional styles for the left image */
         }
 
-        /* Title in the center */
         .title {
             text-align: center;
             font-size: 24px;
@@ -29,13 +27,11 @@
             color: #333;
         }
 
-        /* Image on the right */
         .right-image {
             width: 100px;
             border-radius: 8px;
         }
 
-        /* CSS styles for the layout */
         body {
             margin: 0;
             padding: 0;
@@ -156,7 +152,9 @@
     </style>
 </head>
 <body>
+    <!-- Main container for the page content -->
     <div class="container">
+        <!-- Names of the project contributors -->
         <div class="names-container">
             <p>Constantin Hannes Ernstberger</p>
             <p>Julian Sauer</p>
@@ -164,11 +162,15 @@
             <p>Louis Skowronek</p>
             <p>Alexander Rothmaier</p>
         </div>
+        <!-- Top section containing project title and images -->
         <div class="top-section">
+            <!-- Left image and project title -->
             <img src="resources/lego.png" alt="Left Image" class="left-image">
             <h1 class="title">LEGO Mindstorm: Real-Time Instruction Manual</h1>
+            <!-- Right image -->
             <img src="resources/kit.jpeg" alt="Right Image" class="right-image">
         </div>
+        <!-- Main content area -->
         <div class="paragraph">
             <p>Welcome to the LEGO Piece Identification and Assembly Web App!</p>
         </div>
@@ -187,12 +189,18 @@
         <div class="paragraph">
             <p>ENJOY!</p>
         </div>
+        <!-- Selection of mode -->
         <div class="mode-selection">
+            <!-- Assembly mode button -->
             <button id="assembly-btn" class="button assembly-button selected">Assembly</button>
+            <!-- Disassembly mode button -->
             <button id="disassembly-btn" class="button disassembly-button">Disassembly</button>
+            <!-- Start instruction mode -->
             <a href="/live" class="button go-button">GO</a>
         </div>
+        <!-- JavaScript functionality -->
         <script>
+            // When the DOM is fully loaded
             document.addEventListener('DOMContentLoaded', () => {
                 const assemblyBtn = document.getElementById('assembly-btn');
                 const disassemblyBtn = document.getElementById('disassembly-btn');
