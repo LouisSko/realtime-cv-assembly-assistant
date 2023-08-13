@@ -1,5 +1,7 @@
 # Object Detection Project
 
+![Example Image](videos/images/Screenshot%20from%202023-07-29%2017-42-14.png)
+
 # Object Detection Project Setup and Use Instructions
 
 This README provides instructions for the initial setup of the Object Detection Project and its regular use. 
