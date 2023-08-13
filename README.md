@@ -1,6 +1,6 @@
 # Object Detection Project
 
-![Example Image](videos/images/Screenshot%20from%202023-07-29%2017-42-14.png)
+![Example Image](videos/images/thumbnail.jpg)
 
 # Object Detection Project Setup and Use Instructions
 
