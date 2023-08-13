@@ -193,9 +193,20 @@ def draw_detections(image, boxes, scores, class_ids, required_class_ids=None, ma
     # Merge the mask and the detection images
     return cv2.addWeighted(mask_img, mask_alpha, det_img, 1 - mask_alpha, 0)
 
-
 class MotionDetector:
+    """
+    A class to detect motion between video frames.
+    """
+
     def __init__(self, threshold=30, th_diff=0.3, skip_frames=30):
+        """
+        Initialize motion detector.
+
+        Args:
+            threshold (int): Threshold value for binarizing the difference between frames.
+            th_diff (float): Proportion threshold for deciding if motion is detected.
+            skip_frames (int): Number of frames to skip before comparing the next frame.
+        """
         self.threshold = threshold
         self.th_diff = th_diff
         self.skip_frames = skip_frames
@@ -203,44 +214,49 @@ class MotionDetector:
         self.comparison_frame_counter = 0
         self.motion_flag = True
 
-    def set_skip_frames(self):
-        if self.motion_flag:
-            self.skip_frames = 15
-        else:
-            self.skip_frames = 15
+
 
     def detect_motion(self, frame):
+        """
+        Detect motion by comparing the current frame with the previous frame.
+
+        Args:
+            frame (numpy.ndarray): The current frame from a video/camera stream.
+
+        Returns:
+            bool: True if motion is detected, else False.
+        """
+        # First frame is set as the previous frame and return False since we can't compare it with any other frame
         if self.prev_frame is None:
             self.prev_frame = frame
             return False
 
+        # Increment the frame comparison counter
         self.comparison_frame_counter += 1
 
+        # Compare frames once the comparison counter reaches the skip_frames count
         if self.comparison_frame_counter >= self.skip_frames:
-            # reset comparison counter
+            # Reset comparison counter
             self.comparison_frame_counter = 0
 
-            # Convert frames to grayscale
+            # Convert frames to grayscale for simpler comparison
             prev_frame_gray = cv2.cvtColor(self.prev_frame, cv2.COLOR_BGR2GRAY)
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            # Perform absolute difference between the current and previous frames
+            # Compute absolute difference between the current and previous frames
             frame_diff = cv2.absdiff(frame_gray, prev_frame_gray)
 
-            # Apply thresholding to obtain a binary image
+            # Apply thresholding to get a binary image to highlight areas of motion
             _, thresholded_diff = cv2.threshold(frame_diff, self.threshold, 255, cv2.THRESH_BINARY)
 
-            # Count the number of non-zero pixels (white pixels) in the thresholded difference image
-            motion_pixels = cv2.countNonZero(thresholded_diff)
-
-            # calculate threshold
+            # Calculate the number of changed pixels (motion pixels)
             total_pixels = self.prev_frame.shape[0] * self.prev_frame.shape[1]
             motion_pixels = cv2.countNonZero(thresholded_diff)
 
-            # update prev_frame
+            # Update prev_frame for the next iteration
             self.prev_frame = frame
 
-            # if more than th_diff of the pixels are different return true
+            # Check if the proportion of motion pixels exceeds the defined threshold
             if motion_pixels / total_pixels > self.th_diff:
                 self.motion_flag = True
             else:
@@ -249,40 +265,91 @@ class MotionDetector:
         return self.motion_flag
 
 
-
 def gstreamer_pipeline(
-    sensor_id=0,
-    #capture_width=3246,
-    #capture_height=1848,
-    capture_width=1280,
-    capture_height=720,
-    display_width=1280,
-    display_height=720,
-    framerate=10,
-    flip_method=0,
+        sensor_id=0,
+        # capture_width=3246,
+        # capture_height=1848,
+        capture_width=1280,
+        capture_height=720,
+        display_width=1280,
+        display_height=720,
+        framerate=10,
+        flip_method=0,
 ):
+    """
+    Generate a GStreamer pipeline string for video capture and display.
+
+    This function constructs a pipeline string for GStreamer that is used
+    to capture video from an NVArgus camera source, process it, and display
+    it or send it to an appsink. This is particularly useful for NVIDIA Jetson platforms.
+
+    Args:
+        sensor_id (int, default=0): The sensor ID of the camera to use.
+        capture_width (int, default=1280): Width of the video frame to capture from the camera.
+        capture_height (int, default=720): Height of the video frame to capture from the camera.
+        display_width (int, default=1280): Width of the video frame for display or output.
+        display_height (int, default=720): Height of the video frame for display or output.
+        framerate (int, default=10): Frame rate of the video stream.
+        flip_method (int, default=0): Method to flip the video frames. It can be values from 0 to 3:
+                                     0 = none, 1 = counter-clockwise, 2 = rotate 180, 3 = clockwise.
+
+    Returns:
+        str: GStreamer pipeline string.
+
+    Note: The commented out default values for capture_width and capture_height can be uncommented
+          and used for different camera resolutions.
+    """
+
+    # Constructing the GStreamer pipeline string using the provided parameters.
+    # nvarguscamerasrc is used for capturing from the camera.
+    # The pipeline includes conversions and specifications for video format and dimensions.
     return (
-        "nvarguscamerasrc sensor-id=%d ! "
-        "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
-        "nvvidconv flip-method=%d ! "
-        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
-        "videoconvert ! "
-        "video/x-raw, format=(string)BGR ! appsink"
-        % (
-            sensor_id,
-            capture_width,
-            capture_height,
-            framerate,
-            flip_method,
-            display_width,
-            display_height,
-        )
+            "nvarguscamerasrc sensor-id=%d ! "
+            "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+            "nvvidconv flip-method=%d ! "
+            "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+            "videoconvert ! "
+            "video/x-raw, format=(string)BGR ! appsink"
+            % (
+                sensor_id,
+                capture_width,
+                capture_height,
+                framerate,
+                flip_method,
+                display_width,
+                display_height,
+            )
     )
 
 
 def get_labels_steps():
+    """
+    Generate mapping of labels and steps for assembly.
+
+    This function returns three dictionaries:
+    - The first dictionary maps class indices to class names.
+    - The second dictionary specifies the assembly steps with class indices.
+    - The third dictionary gives a descriptive version of assembly steps with class names.
+
+    Returns:
+    - labels (dict): A dictionary mapping from class index to class name.
+    - steps_no (dict): A dictionary specifying assembly steps using class indices.
+    - steps (dict): A dictionary specifying assembly steps using class names.
+
+    Example:
+    If class_names = ['grey_beam_bent', 'grey_axle_long_stop', ...]
+    The function might return:
+    steps = {
+        1: ['red_oct_con', 'grey_axle_long', 'engine'],
+        2: ['grey_axle_short'],
+        ...
+    }
+    """
+
+    # Mapping from class index to class name
     labels = {i: class_name for i, class_name in enumerate(class_names)}
 
+    # Assembly steps using class indices
     steps_no = {
         1: [4, 8, 15],
         2: [3],
@@ -301,26 +368,7 @@ def get_labels_steps():
         15: [17]
     }
 
+    # Assembly steps using class names derived from labels
     steps = {step: [labels[i] for i in num_list] for step, num_list in steps_no.items()}
 
-    #output
-    #steps = {
-    #    1: [labels[8], labels[4], labels[15]],             # [red_oct_con, grey_axle_long, engine]
-    #    2: [labels[3]],                                   # [grey_axle_short]
-    #    3: [labels[0], labels[10]],                       # [grey_beam_bent, blue_pin_3L]
-    #    4: [labels[10], labels[10], labels[13]],          # [blue_pin_3L, blue_pin_3L, white_beam_L]
-    #    5: [labels[11], labels[11], labels[12]],          # [blue_axle_pin, blue_axle_pin, white_beam_bent]
-    #    6: [labels[1]],                                   # [grey_axle_long_stop]
-    #    7: [labels[7], labels[7]]                         # [black_pin_short, black_pin_short]
-    #    8: [labels[6]],                                   # [black_beam]
-    #    9: [labels[16]],                                  # [wheel]
-    #    10: [labels[14]],                                 # [white_tooth]
-    #    11: [labels[2]],                                  # [grey_axle_short_stop]
-    #    12: [labels[9], labels[9]],                       # [red_pin_3L, red_pin_3L]
-    #    13: [labels[5], labels[7]],                       # [black_axle_pin_con, black_pin_short]
-    #    14: [labels[11], labels[11]],                     # [blue_axle_pin, blue_axle_pin]
-    #    15: [labels[17]]                                  # [wire]
-    #}
-
     return labels, steps_no, steps
-
