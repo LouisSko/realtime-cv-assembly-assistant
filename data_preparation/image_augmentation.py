@@ -82,10 +82,8 @@ def image_augmentation(input_dir, output_dir, nr_of_augs=5):
                     cv2.imwrite(os.path.join(dir_aug_images, aug_image_name), aug_image)
                     save_yolo_file(os.path.join(dir_aug_annot, aug_annot_name), boxes_new)
 
-
+# Check if the script is being run as the main module
 if __name__ == "__main__":
-    # Check if this script is the entry point to the program
-    # This ensures the code below is only executed if the script is run directly, not when imported
 
     # Initialize an argument parser
     parser = argparse.ArgumentParser(description="Augment Images")

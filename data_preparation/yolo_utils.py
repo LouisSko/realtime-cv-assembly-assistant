@@ -7,15 +7,22 @@ from PIL import Image
 
 def read_yolo_file(file_path):
     """
-    Read yolo file and output it as a list
-    :param file_path:
-    :return:
+    Read a YOLO formatted annotation file and return it as a list of bounding boxes.
+
+    Args:
+        file_path (str): Path to the YOLO annotation file.
+
+    Returns:
+        list: List of bounding boxes, where each box is represented as [class_id, x_center, y_center, width, height].
     """
 
+    # Open the file and read its lines
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
     boxes = []
+
+    # Iterate over each line and extract bounding box details
     for line in lines:
         data = line.strip().split(' ')
         class_id = int(data[0])
@@ -24,33 +31,45 @@ def read_yolo_file(file_path):
         width = float(data[3])
         height = float(data[4])
 
+        # Append the extracted bounding box to the boxes list
         boxes.append([class_id, x_center, y_center, width, height])
 
     return boxes
 
+
 def convert_yolo_to_bbf(boxes, pixel_height, pixel_width, formatBoundingBox=False):
     """
-    Convert YOLO format to bounding box format
-    (class_id, x_center, y_center, width, height) to (class id, x_min, x_max, y_min, y_max)
+    Convert bounding boxes from YOLO format to standard bounding box format.
+
+    Args:
+        boxes (list): List of bounding boxes in YOLO format [(class_id, x_center, y_center, width, height), ...].
+        pixel_height (int): Image height in pixels.
+        pixel_width (int): Image width in pixels.
+        formatBoundingBox (bool, optional): If True, return boxes as BoundingBox objects.
+                                           Otherwise, return as lists. Defaults to False.
+
+    Returns:
+        list: List of bounding boxes in standard format [(x_min, y_min, x_max, y_max), ...] or as BoundingBox objects.
     """
 
     boxes_bbf = []
 
+    # Convert each bounding box from YOLO format to standard format
     for box in boxes:
         class_id, x_center, y_center, width, height = box
 
-        # relative position
+        # Convert relative box dimensions to absolute dimensions
         x_min_rel = x_center - (width / 2)
         y_min_rel = y_center - (height / 2)
         x_max_rel = x_center + (width / 2)
         y_max_rel = y_center + (height / 2)
 
-        # absolute position
         x_min = x_min_rel * pixel_width
         y_min = y_min_rel * pixel_height
         x_max = x_max_rel * pixel_width
         y_max = y_max_rel * pixel_height
 
+        # Append the bounding box in the desired format
         if formatBoundingBox:
             boxes_bbf.append(BoundingBox(x1=x_min, y1=y_min, x2=x_max, y2=y_max, label=class_id))
         else:
@@ -61,26 +80,36 @@ def convert_yolo_to_bbf(boxes, pixel_height, pixel_width, formatBoundingBox=Fals
 
 def convert_bbf_to_yolo(boxes):
     """
-    Convert bounding box format to YOLO format
-    (class id, x_min, x_max, y_min, y_max) to (class_id, x_center, y_center, width, height)
+    Convert bounding boxes from standard format to YOLO format.
+
+    Args:
+        boxes (BoundingBoxesOnImage): List of bounding boxes in standard format
+                                      (class id, x_min, y_min, x_max, y_max).
+
+    Returns:
+        list: List of bounding boxes in YOLO format [(class_id, x_center, y_center, width, height), ...].
     """
+
+    # Extract image dimensions from the bounding box shape
     pixel_height, pixel_width = boxes.shape[0], boxes.shape[1]
+
     yolo_boxes = []
+
+    # Convert each bounding box from standard format to YOLO format
     for bb in boxes.bounding_boxes:
 
-        # only store bb if its in the image
+        # Check if bounding box is fully within image
         if bb.is_fully_within_image(boxes.shape):
             class_id = bb.label
             x1, y1, x2, y2 = bb.x1, bb.y1, bb.x2, bb.y2
 
-            # only append boxes for those objects which are still visible after the augmentation
-            # if not (x1 < 0 and x2 < 0) or (x1 > pixel_width and x2 > pixel_width) or (y1 < 0 and y2 < 0)or (y1 > pixel_height and y2 > pixel_height):
-
+            # Convert absolute box dimensions to relative dimensions
             x_center = (x1 + x2) / 2.0 / pixel_width
             y_center = (y1 + y2) / 2.0 / pixel_height
             width = (x2 - x1) / pixel_width
             height = (y2 - y1) / pixel_height
 
+            # Append the bounding box in YOLO format
             yolo_boxes.append(
                 [class_id, np.round(x_center, 6), np.round(y_center, 6), np.round(width, 6), np.round(height, 6)])
 
@@ -88,37 +117,58 @@ def convert_bbf_to_yolo(boxes):
 
 
 def save_yolo_file(file_path, bounding_boxes):
+    """
+    Save a list of bounding boxes in YOLO format to a file.
+
+    Args:
+        file_path (str): The path to the file where bounding boxes should be saved.
+        bounding_boxes (list): A list of bounding boxes in YOLO format.
+                               Each bounding box is a list [class_id, x_center, y_center, width, height].
+    """
+
+    # Open the file in write mode
     with open(file_path, 'w') as file:
+        # Iterate over each bounding box in the list
         for bbox in bounding_boxes:
+            # Convert bounding box values to a space-separated string
             line = ' '.join(str(value) for value in bbox)
+
+            # Write the bounding box string to the file
             file.write(line + '\n')
 
 
-# creates a new directory inside directory which is called XML
-
 def convert_yolo_to_voc(directory, labels_dir, dir_images, yolo_class_list_file):
-    # Get a list of all the classes used in the yolo format
+    """
+    Convert annotations from YOLO format to VOC (Pascal) XML format.
+
+    Args:
+        directory (str): Directory where the converted XML files will be saved.
+        labels_dir (str): Directory containing the YOLO formatted annotation files.
+        dir_images (str): Directory containing the image files.
+        yolo_class_list_file (str): Path to the file containing the YOLO class names.
+
+    Returns:
+        None
+    """
+
+    # Load the list of class names from the YOLO class file
     with open(yolo_class_list_file) as f:
         yolo_classes = f.readlines()
     array_of_yolo_classes = [x.strip() for x in yolo_classes]
 
-
-    # Description of Yolo Format values
-    # 15 0.448743 0.529142 0.051587 0.021081
-    # class_number x_yolo y_yolo yolo_width yolo_height
-
     def is_number(n):
+        """Helper function to check if a string is a number."""
         try:
             float(n)
             return True
         except ValueError:
             return False
 
-
+    # Ensure the output directory exists
     if not os.path.exists(os.path.join(directory, 'XML')):
-        # If an XML folder does not already exist, make one
         os.mkdir(os.path.join(directory, 'XML'))
 
+    # Iterate over each YOLO annotation file
     for yolo_file in os.listdir(labels_dir):
         if yolo_file.endswith("txt"):
             the_file = open(os.path.join(labels_dir, yolo_file), 'r')
@@ -127,7 +177,8 @@ def convert_yolo_to_voc(directory, labels_dir, dir_images, yolo_class_list_file)
 
             file_name = yolo_file.split('.')[0]
 
-            # Check to see if there is an image that matches the txt file
+            # Check for the corresponding image for the current annotation
+            # and determine its type (JPEG, JPG, PNG)
             if os.path.exists(os.path.join(dir_images, file_name + '.jpeg')):
                 image_name = os.path.join(dir_images, file_name + '.jpeg')
             if os.path.exists(os.path.join(dir_images, file_name + '.jpg')):
@@ -162,12 +213,6 @@ def convert_yolo_to_voc(directory, labels_dir, dir_images, yolo_class_list_file)
                         # regex to find the numbers in each line of the text file
                         yolo_array = re.split("\s", each_line.rstrip())  # remove any extra space from the end of the line
 
-                        # initalize the variables
-                        class_number = 0
-                        x_yolo = 0.0
-                        y_yolo = 0.0
-                        yolo_width = 0.0
-                        yolo_height = 0.0
                         yolo_array_contains_only_digits = True
 
                         # make sure the array has the correct number of items
