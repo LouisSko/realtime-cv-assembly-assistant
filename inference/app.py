@@ -4,6 +4,7 @@ import sys
 # Go up one directory from the current script's directory -> necessary for imports
 PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(PROJECT_PATH)
+
 # Determine the path to the file dynamically, based on the location of the currently-running script: -> necessary for loading model
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -46,8 +47,20 @@ necessary_pieces = []
 
 def capture_camera(model_path, video_source, use_camera_stream, skip_frames):
     """
-    This function is responsible for capturing frames from the camera,
-    performing object detection, and returning the detection results.
+    Capture video frames from a camera or video source and perform object detection.
+
+    This function captures video frames, detects objects using a YOLOv8 model, and
+    returns the detection results. It also integrates a motion detection mechanism
+    to optimize the detection process.
+
+    Parameters:
+    - model_path (str): Path to the YOLOv8 model weights.
+    - video_source (str): Path to the video file or camera source identifier.
+    - use_camera_stream (bool): Whether to capture from a camera stream using gstreamer.
+    - skip_frames (int): Number of frames to skip before performing detection.
+
+    Yields:
+    - bytes: A JPEG-encoded frame with drawn detections in HTTP response format.
     """
 
     if use_camera_stream:
@@ -75,7 +88,6 @@ def capture_camera(model_path, video_source, use_camera_stream, skip_frames):
     detections_endpoint = 'http://127.0.0.1:5000/detections'
 
     while cap.isOpened():
-
         # Read frame from the video
         retrieved_frame, frame = cap.read()
         frame_counter += 1
@@ -97,10 +109,10 @@ def capture_camera(model_path, video_source, use_camera_stream, skip_frames):
             # Detect motion in the frame
             motion = motion_detector.detect_motion(frame)
 
-            # If there is motion, no detections are performed
+            # If motion is detected, skip detections; otherwise, perform object detection
             if motion:
                 boxes, scores, class_ids = yolov8_detector.no_detections()
-            else:  # If there is no motion, perform detections
+            else:
                 boxes, scores, class_ids = yolov8_detector.detect_objects(frame)
 
             # Format and post detection results
@@ -111,7 +123,7 @@ def capture_camera(model_path, video_source, use_camera_stream, skip_frames):
             frame = yolov8_detector.draw_detections(frame, required_class_ids=pieces)
             jpeg_frame = encode_frame_to_jpeg(frame)
 
-            # Yield the frame in HTTP response format
+            # Return the JPEG frame in HTTP response format
             yield format_http_response(jpeg_frame)
 
 
@@ -122,33 +134,59 @@ def encode_frame_to_jpeg(frame):
     :param frame: The frame to be encoded.
     :return: The frame in JPEG format.
     """
+
+    # Use OpenCV's imencode function to encode the frame into JPEG format
+    # The function returns two values:
+    # 1. A boolean indicating the success of the operation
+    # 2. The encoded image as an array of bytes (buffer)
     _, buffer = cv2.imencode('.jpg', frame)
+
+    # Convert the buffer array (encoded image) into a flat byte string
     jpeg_frame = buffer.tobytes()
+
+    # Return the encoded frame in JPEG format as a bytes object
     return jpeg_frame
 
 
 def format_http_response(jpeg_frame):
     """
-    This function formats the given JPEG frame into a HTTP response.
+    This function formats the given JPEG frame into a HTTP response suitable for MJPEG streaming.
 
     :param jpeg_frame: The JPEG frame to be sent in the response.
     :return: The HTTP response.
     """
+
+    # The response is constructed for MJPEG streaming.
+    # It starts with the boundary string '--frame' followed by a CRLF (\r\n).
+    # Then, the Content-Type is set to 'image/jpeg' indicating the type of the content.
+    # Two CRLFs (\r\n\r\n) are used to separate the headers from the body.
+    # The body contains the actual JPEG frame.
+    # Finally, two more CRLFs denote the end of this part of the response.
     http_response = (b'--frame\r\n'
                      b'Content-Type: image/jpeg\r\n\r\n' + jpeg_frame + b'\r\n\r\n')
+
+    # Return the formatted HTTP response
     return http_response
 
 
 def get_response_from_url(url):
     """
     Get a JSON response from a given URL.
-    
-    param: url (str): The URL to fetch the JSON response from.    
-    return: dict or None: The JSON response if successful, None if not.
+
+    :param url (str): The URL to fetch the JSON response from.
+    :return: dict or None: The JSON response if successful, None if not.
     """
+
+    # Make a GET request to the provided URL
     response = requests.get(url)
+
+    # Check if the response status code is 200 (HTTP OK)
+    # If yes, parse the response as JSON and return it
     if response.status_code == 200:
         return response.json()
+
+    # If the response status code is not 200, print an error message
+    # and return None
     else:
         print('Error:', response.status_code)
         return None
