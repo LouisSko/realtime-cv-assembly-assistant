@@ -6,12 +6,5 @@ test: /Users/louis.skowronek/AISS/aiss_images/test/images
 nc: 18
 
 # Classes
-# TODO: update classes
-names: ['grey1', 'grey2', 'grey3', 'grey4', 'grey5', 'black1', 'black2', 'black3', 'red1', 'red2', 'blue1', 'blue2', 'white1', 'white2', 'white3', 'engine', 'wheel', 'wire']
+names: ['grey_beam_bent', 'grey_axle_long_stop', 'grey_axle_short_stop', 'grey_axle_short', 'grey_axle_long', 'black_axle_pin_con', 'black_beam', 'black_pin_short', 'red_oct_con', 'red_pin_3L', 'blue_pin_3L', 'blue_axle_pin', 'white_beam_bent', 'white_beam_L', 'white_tooth', 'engine', 'wheel', 'wire']
 
-# data augmentation settings
-# Mosaic augmentation
-augment: True
-mosaic: 1.0  # probability of applying mosaic augmentation
-mixup: 0.0  # probability of applying mixup augmentation
-degrees: 45
