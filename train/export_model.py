@@ -1,4 +1,4 @@
-def main():
+def export_yolo_v8():
     """
     Main function to load a YOLO model and export it to ONNX format.
     """
@@ -22,4 +22,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    export_yolo_v8()
