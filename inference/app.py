@@ -1,13 +1,15 @@
 import os
 import sys
 
-# Go up one directory from the current script's directory -> necessary for imports
+# Add the parent directory to the system path for importing custom modules.
 PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(PROJECT_PATH)
 
-# Determine the path to the file dynamically, based on the location of the currently-running script: -> necessary for loading model
+# Determine the path to the file dynamically based on the location of the currently-running script.
+# This is necessary for loading model-related configurations or files.
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
+# External library imports
 import cv2
 from flask import Flask, jsonify, render_template, Response, request
 import requests
@@ -15,30 +17,31 @@ from onnx_yolov8.YOLOv8 import YOLOv8
 from onnx_yolov8.utils import MotionDetector, get_labels_steps, gstreamer_pipeline
 import argparse
 
-# parse command line arguments
+# Set up command line argument parser
 parser = argparse.ArgumentParser(description='Process a video file or gstreamer pipeline with a specified model.')
 parser.add_argument('--model_path', type=str, default='../models/yolov8s_best.onnx',
                     help='Path to the model file.')
 parser.add_argument('--video_source', type=str, default='../videos/blue_pin_long.mp4',
                     help='Path to the video file to be processed.')
-parser.add_argument('--use_camera_stream', action='store_true',  # if the command line argument is specified, then argparse will assign the value True
+parser.add_argument('--use_camera_stream', action='store_true',
                     help='Use this flag if the camera stream of the nano should be used.')
 parser.add_argument('--skip_frames', type=int, default=5,
                     help='Make detections and send information only every n frames')
 
+# Parse the command line arguments
 args = parser.parse_args()
 
-# assign command line arguments to global variables
+# Assign parsed command line arguments to variables
 model_path = args.model_path
 video_source = args.video_source
 use_camera_stream = args.use_camera_stream
 skip_frames = args.skip_frames
 
-
-# Configurations for the assembly steps
-# Get the labels and steps information
+# Configuration for the assembly steps
+# Fetch labels and steps configuration
 LABELS, STEPS_NO, STEPS = get_labels_steps()
-# Set the default mode, step for assembly, detection results and necessary pieces
+
+# Initialize default settings and empty lists for processing
 current_mode = 'Assembly'
 current_step = 1
 detection_results = []
