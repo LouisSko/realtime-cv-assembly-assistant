@@ -140,6 +140,12 @@ def format_http_response(jpeg_frame):
 
 
 def get_response_from_url(url):
+    """
+    Get a JSON response from a given URL.
+    
+    param: url (str): The URL to fetch the JSON response from.    
+    return: dict or None: The JSON response if successful, None if not.
+    """
     response = requests.get(url)
     if response.status_code == 200:
         return response.json()
@@ -149,6 +155,13 @@ def get_response_from_url(url):
 
 
 def update_detector_settings(detector, settings_url):
+    """
+    Update the settings of a detector based on the provided URL.
+    
+    param: 
+        detector: The detector object to update settings for.
+        settings_url (str): The URL to fetch detector settings from.
+    """
     settings_resp = get_response_from_url(settings_url)
     if settings_resp is not None:
         coloring = settings_resp['coloring']
@@ -161,6 +174,13 @@ def update_detector_settings(detector, settings_url):
 
 
 def get_required_pieces(pieces_url):
+    """
+    Get the required pieces from the provided URL.
+
+    param: pieces_url (str): The URL to fetch the required pieces from.
+
+    return: List of labels representing the required pieces.
+    """
     response = get_response_from_url(pieces_url)
     if response is not None:
         return response  # is a list of labels e.g. ['grey4', 'wire']
@@ -168,6 +188,16 @@ def get_required_pieces(pieces_url):
 
 
 def format_detection_results(boxes, class_ids, scores):
+    """
+    Format detection results into a consistent structure.
+
+    param:
+        boxes: List of bounding boxes for detected objects.
+        class_ids: List of class IDs for detected objects.
+        scores: List of confidence scores for detected objects.
+
+    return: List of dictionaries with formatted detection results.
+    """
     detection_results = [{'label': str(class_id), 'confidence': str(score), 'boxes': str(box)}
                          for box, class_id, score in zip(boxes, class_ids, scores)]
 
@@ -175,6 +205,13 @@ def format_detection_results(boxes, class_ids, scores):
 
 
 def post_detection_results(detection_results, detection_url):
+    """
+    Post detection results to the specified URL.
+
+    param:
+        detection_results: List of dictionaries containing detection results.
+        detection_url (str): The URL to send the detection results to.
+    """
     headers = {'Content-Type': 'application/json'}
     response = requests.post(detection_url, json=detection_results, headers=headers)
 
@@ -187,29 +224,54 @@ def post_detection_results(detection_results, detection_url):
 app = Flask(__name__, static_folder='resources')
 
 
-# Load Homepage
 @app.route('/')
 def index():
+    """
+    Load the homepage.
+    
+    Returns:
+        Rendered template for the homepage.
+    """
     return render_template('index.html')
 
 
-# Post user settings
 @app.route('/settings', methods=['POST'])
 def set_settings():
+    """
+    Post user settings.
+    
+    Expects JSON data with user settings and updates the global settings variable.
+    
+    Returns:
+        JSON response confirming the success of the settings update.
+    """
     global settings
     settings = request.get_json()
     return jsonify('Success')
 
 
-# Get user settings
 @app.route('/settings', methods=['GET'])
 def get_settings():
+    """
+    Get user settings.
+    
+    Returns:
+        JSON response with the current user settings.
+    """
     return jsonify(settings)
 
 
-# Set mode and first instruction
 @app.route('/start', methods=['POST'])
 def start():
+    """
+    Set the mode and first instruction step.
+    
+    Expects JSON data with 'mode' field ('Assembly' or 'Disassembly').
+    Sets the current_mode and current_step accordingly.
+    
+    Returns:
+        JSON response with 'step' and 'pieces' for the initial instruction step.
+    """
     global current_mode, current_step
 
     data = request.get_json()
@@ -224,9 +286,16 @@ def start():
     return jsonify({'step': current_step, 'pieces': STEPS[current_step]})
 
 
-# Load live instructions
 @app.route('/live')
 def live():
+    """
+    Load live instruction page based on current mode and step.
+    
+    Renders live instruction template with appropriate data.
+    
+    Returns:
+        Rendered template for live instruction.
+    """
     global current_step, current_mode
     instruction_image = 'resources/{}.jpeg'.format(current_step)
     if current_mode == 'Assembly':
@@ -238,14 +307,28 @@ def live():
                                instruction_image=instruction_image,
                                step=current_step, pieces=STEPS[current_step])
     
+    
 @app.route('/end')
 def end():
+    """
+    Load end page.
+    
+    Returns:
+        Rendered template for the end page.
+    """
     return render_template('end.html')
 
 
-# Go to next instruction step
 @app.route('/next', methods=['POST'])
 def next_step():
+    """
+    Move to the next instruction step.
+    
+    Increments the current_step. If it's the last step, redirects to the end page.
+    
+    Returns:
+        JSON response with 'step', 'pieces', and 'labels' for the next step.
+    """
     global current_step
 
     # Increment the current step
@@ -258,9 +341,16 @@ def next_step():
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 
-# Go to previous instruction step
 @app.route('/previous', methods=['POST'])
 def previous_step():
+    """
+    Move to the previous instruction step.
+    
+    Decrements the current_step. If it's the first step, redirects to the end page.
+    
+    Returns:
+        JSON response with 'step', 'pieces', and 'labels' for the previous step.
+    """
     global current_step
 
     # Decrement the current step
@@ -273,9 +363,16 @@ def previous_step():
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
 
-# POST all necessary pieces of current instruction step
 @app.route('/send-pieces', methods=['POST'])
 def send_pieces():
+    """
+    Store the necessary pieces for the current instruction step.
+    
+    Expects JSON data with 'pieces' field containing a list of necessary pieces.
+    
+    Returns:
+        JSON response with success message.
+    """
     global necessary_pieces
     # Get the necessary pieces from the request payload
     necessary_pieces = request.json['pieces']
@@ -284,20 +381,39 @@ def send_pieces():
     return jsonify({'message': 'Necessary pieces sent successfully'})
 
 
-# GET all necssary pices of current instruction stepp
 @app.route('/send-pieces', methods=['GET'])
 def get_pieces():
+    """
+    Get the necessary pieces for the current instruction step.
+    
+    Returns:
+        JSON response with the list of necessary pieces.
+    """
     return jsonify(necessary_pieces)
 
 
 @app.route('/video_feed')
 def video_feed():
+    """
+    Stream video feed from the camera with detected objects overlay.
+    
+    Returns:
+        Response containing the video stream with detected objects overlay.
+    """
     return Response(capture_camera(model_path, video_source, use_camera_stream, skip_frames), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-# POST detected pieces
 @app.route('/detections', methods=['POST'])
 def handle_detections():
+    """
+    Handle the detection results sent by the client.
+    
+    Expects JSON data with a list of dictionaries containing 'label', 'confidence', and 'boxes'.
+    Checks the validity of the data and stores the detection results.
+    
+    Returns:
+        Response confirming the receipt of detection results or an error message.
+    """
     global detection_results
 
     data = request.get_json()
@@ -310,15 +426,28 @@ def handle_detections():
     return 'Detection results received.'
 
 
-# GET detected pieces
 @app.route('/detections', methods=['GET'])
 def get_detections():
+    """
+    Get the stored detection results.
+    
+    Returns:
+        JSON response with the stored detection results.
+    """
     return jsonify(detection_results)
 
 
-# POST results of check
 @app.route('/labels', methods=['POST'])
 def handle_labels():
+    """
+    Handle the results of checking detected pieces against expected pieces.
+    
+    Checks if the necessary pieces for the current instruction step are correctly detected.
+    Returns a message indicating the correctness of the detection.
+    
+    Returns:
+        JSON response with a message about the correctness of detected pieces.
+    """
     global current_step, current_mode, detection_results
 
     labels = []
@@ -365,12 +494,16 @@ def handle_labels():
                 'message': 'All necessary LEGO parts were disassembled correctly. Press "Next Step" to go to the next disassembly step.'})
 
 
-# Handle error in case wrong page is opened
 @app.errorhandler(404)
 def page_not_found(error):
+    """
+    Handle error when a wrong page is opened.
+    
+    Returns:
+        Rendered template for a 404 error page.
+    """
     return render_template('404.html'), 404
 
 
 if __name__ == '__main__':
-
     app.run()
