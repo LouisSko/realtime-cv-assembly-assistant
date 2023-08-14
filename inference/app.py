@@ -273,6 +273,9 @@ def index():
     Returns:
         Rendered template for the homepage.
     """
+    global current_mode, current_step
+    current_mode = 'Assembly'
+    current_step = 1
     return render_template('index.html')
 
 
@@ -370,14 +373,17 @@ def next_step():
     Returns:
         JSON response with 'step', 'pieces', and 'labels' for the next step.
     """
-    global current_step
+    global current_step, current_mode
 
     # Increment the current step
     current_step += 1
 
     # Check if we have reached the maximum step
     if current_step > 15:
-        return render_template('end.html')
+        if current_mode == 'Assembly':
+            return render_template('end.html')
+        else:
+            current_step = 15
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
@@ -392,14 +398,17 @@ def previous_step():
     Returns:
         JSON response with 'step', 'pieces', and 'labels' for the previous step.
     """
-    global current_step
+    global current_step, current_mode
 
     # Decrement the current step
     current_step -= 1
 
     # Check if we have reached the minimum step
     if current_step < 1:
-        return render_template('end.html')
+        if current_mode == 'Disassembly':
+            return render_template('end.html')
+        else: 
+            current_step = 1
 
     return jsonify({'step': current_step, 'pieces': STEPS[current_step], 'labels': STEPS_NO[current_step]})
 
